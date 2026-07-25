@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sekuntum Studio — bouquet wajah siap dalam seminit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=DM+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blush:#F6DCDF;
+  --paper:#FFF9F5;
+  --ink:#3A1C2A;
+  --ink-soft:#7A5262;
+  --rose:#D8536F;
+  --leaf:#4E6B4A;
+  --brass:#B98A3C;
+  --line:rgba(58,28,42,.14);
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--blush);
+  background-image:radial-gradient(rgba(58,28,42,.05) 1px,transparent 1px);
+  background-size:22px 22px;
+  color:var(--ink);
+  font-family:'DM Sans',system-ui,sans-serif;
+  line-height:1.5;
+  min-height:100vh;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* ---- kepala ---- */
+header{padding:26px 0 18px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font-family:'Fraunces',serif;font-weight:600;font-size:30px;letter-spacing:-.02em}
+.brand h1 em{font-style:italic;font-weight:500;color:var(--rose)}
+.brand span{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.rule{height:1px;background:var(--line);margin:16px 0 0}
+.rule.brass{background:linear-gradient(90deg,var(--brass),transparent)}
+
+/* ---- susun atur ---- */
+.grid{display:grid;grid-template-columns:1fr;gap:22px;padding:22px 0 60px}
+@media(min-width:900px){.grid{grid-template-columns:400px 1fr;gap:28px;align-items:start}}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.card + .card{margin-top:18px}
+
+/* ---- pentas pratonton ---- */
+.stage{position:sticky;top:20px;order:-1}
+@media(min-width:900px){.stage{order:0}}
+.stage-inner{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;align-items:center}
+#preview{max-width:100%;max-height:62vh;border-radius:8px;display:none;box-shadow:0 18px 40px -20px rgba(58,28,42,.45)}
+#preview.on{display:block;animation:mekar .5s ease-out}
+@keyframes mekar{from{opacity:0;transform:scale(.965)}to{opacity:1;transform:scale(1)}}
+
+.empty{width:100%;padding:54px 22px;text-align:center;border:1.5px dashed rgba(58,28,42,.25);border-radius:8px;background:
+  repeating-linear-gradient(45deg,rgba(185,138,60,.05) 0 10px,transparent 10px 20px)}
+.empty h2{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:6px}
+.empty p{font-size:14px;color:var(--ink-soft);max-width:34ch;margin:0 auto 18px}
+
+/* ---- label langkah ---- */
+.step{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.step::after{content:"";flex:1;height:1px;background:var(--line)}
+.card h3{font-family:'Fraunces',serif;font-size:19px;font-weight:600;margin-bottom:4px}
+.hint{font-size:13px;color:var(--ink-soft);margin-bottom:14px}
+
+/* ---- kawalan ---- */
+.btn{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;border:none;border-radius:999px;padding:13px 24px;cursor:pointer;transition:transform .12s ease,filter .12s ease}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.btn-rose{background:var(--rose);color:#fff;box-shadow:0 8px 18px -10px var(--rose)}
+.btn-rose:hover{filter:brightness(1.06)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn-ghost:hover{background:rgba(58,28,42,.04)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;width:100%;margin-top:16px}
+.btn-row .btn{flex:1;min-width:130px}
+
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:13px;padding:9px 15px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--ink-soft);font-family:'DM Sans',sans-serif}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+.swatches{display:flex;gap:10px}
+.sw{width:52px;height:52px;border-radius:10px;border:2px solid transparent;cursor:pointer;padding:0;overflow:hidden;display:flex}
+.sw span{flex:1}
+.sw[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 3px rgba(58,28,42,.08)}
+
+label.f{display:block;font-size:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px}
+input[type=text]{width:100%;font-family:'DM Sans',sans-serif;font-size:15px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+input[type=text]:focus{outline:none;border-color:var(--rose)}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;border-radius:99px;background:rgba(58,28,42,.18)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:99px;background:var(--paper);border:2px solid var(--rose);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:99px;background:var(--paper);border:2px solid var(--rose);cursor:pointer}
+
+/* ---- bingkai muka ---- */
+.cropbox{display:flex;gap:16px;align-items:center}
+#cropStage{width:132px;height:132px;border-radius:10px;touch-action:none;cursor:grab;background:#efe6e2;flex:0 0 auto}
+#cropStage:active{cursor:grabbing}
+.cropbox .sliders{flex:1}
+
+.locked{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-soft);margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em}
+.dot{width:7px;height:7px;border-radius:99px;background:var(--brass)}
+
+/* ---- modal ---- */
+dialog{border:none;border-radius:var(--r);padding:0;max-width:400px;width:calc(100% - 40px);background:var(--paper);color:var(--ink)}
+dialog::backdrop{background:rgba(58,28,42,.55)}
+.modal{padding:24px}
+.plan{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
+.plan[aria-pressed="true"]{border-color:var(--rose);background:rgba(216,83,111,.06)}
+.plan strong{font-family:'Fraunces',serif;font-size:17px}
+.plan small{display:block;color:var(--ink-soft);font-size:12.5px}
+.price{font-family:'Fraunces',serif;font-size:18px;color:var(--rose)}
+
+/* ---- toast ---- */
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);opacity:0;transition:.28s ease;background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:999px;font-size:14px;z-index:99}
+#toast.on{transform:translate(-50%,0);opacity:1}
+
+footer{padding:0 0 40px;font-size:12.5px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;letter-spacing:.04em}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Sekuntum <em>Studio</em></h1>
+      <span>Bouquet wajah · siap dalam seminit</span>
+    </div>
+    <div class="rule brass"></div>
+  </header>
+
+  <div class="grid">
+
+    <!-- BORANG -->
+    <div>
+      <div class="card">
+        <div class="step">Langkah 01 · Wajah</div>
+        <h3>Gambar pelanggan</h3>
+        <p class="hint">Gambar tak keluar dari telefon anda — semua gubahan dibuat dalam pelayar.</p>
+        <input type="file" id="file" accept="image/*" hidden>
+        <button class="btn btn-ghost" style="width:100%" onclick="document.getElementById('file').click()">Pilih gambar</button>
+
+        <div id="cropWrap" hidden>
+          <label class="f">Tarik untuk letak muka dalam bulatan</label>
+          <div class="cropbox">
+            <canvas id="cropStage" width="264" height="264"></canvas>
+            <div class="sliders">
+              <label class="f" style="margin-top:0">Zum</label>
+              <input type="range" id="zoom" min="10" max="45" value="18">
+              <label class="f">Pusing</label>
+              <input type="range" id="rot" min="-30" max="30" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step">Langkah 02 · Gubahan</div>
+        <h3>Bentuk &amp; warna</h3>
+        <p class="hint">Pratonton berubah serta-merta setiap kali anda ubah pilihan.</p>
+
+        <label class="f">Bentuk</label>
+        <div class="chips" id="shapes">
+          <button class="chip" data-shape="round" aria-pressed="true">Bulat · 9 wajah</button>
+          <button class="chip" data-shape="heart" aria-pressed="false">Hati · 13 wajah</button>
+          <button class="chip" data-shape="lush" aria-pressed="false">Mewah · 17 wajah</button>
+        </div>
+
+        <label class="f">Warna bunga</label>
+        <div class="swatches" id="themes"></div>
+
+        <label class="f">Saiz muat naik</label>
+        <div class="chips" id="ratios">
+          <button class="chip" data-ratio="post" aria-pressed="true">Feed 4:5</button>
+          <button class="chip" data-ratio="square" aria-pressed="false">Segi empat</button>
+          <button class="chip" data-ratio="story" aria-pressed="false">TikTok 9:16</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="step">Langkah 03 · Kata-kata</div>
+        <h3>Nama penerima</h3>
+        <label class="f">Nama</label>
+        <input type="text" id="name" maxlength="20" placeholder="Aisyah">
+        <label class="f">Ucapan pendek</label>
+        <input type="text" id="msg" maxlength="34" placeholder="Selamat hari jadi ke-25">
+      </div>
+    </div>
+
+    <!-- PENTAS -->
+    <div class="stage">
+      <div class="stage-inner">
+        <canvas id="preview"></canvas>
+
+        <div class="empty" id="empty">
+          <h2>Pentas masih kosong</h2>
+          <p>Pilih satu gambar wajah yang terang dan jelas. Gubahan akan terbentuk di sini serta-merta.</p>
+          <button class="btn btn-rose" onclick="document.getElementById('file').click()">Pilih gambar wajah</button>
+        </div>
+
+        <div class="btn-row" id="actions" hidden>
+          <button class="btn btn-rose" id="shareBtn">Kongsi</button>
+          <button class="btn btn-ghost" id="dlBtn">Muat turun</button>
+          <button class="btn btn-ghost" id="shuffleBtn" title="Susunan baharu">Susun semula</button>
+        </div>
+        <div class="locked" id="lockNote" hidden>
+          <span class="dot"></span>
+          <span>Versi percuma ada tanda air kecil · <a href="#" id="unlockLink" style="color:var(--rose)">buka HD bersih</a></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Sekuntum Studio · gubahan dibuat dalam pelayar anda</footer>
+</div>
+
+<dialog id="pay">
+  <div class="modal">
+    <div class="step">Buka HD</div>
+    <h3 style="font-family:Fraunces,serif;font-size:20px;margin-bottom:4px">Buang tanda air</h3>
+    <p class="hint">Fail PNG penuh, tiada tanda air, sesuai untuk cetak dan hantar kepada pelanggan.</p>
+    <div class="plan" data-plan="1" aria-pressed="false"><div><strong>Sekali guna</strong><small>Satu gubahan HD</small></div><span class="price">RM 5</span></div>
+    <div class="plan" data-plan="50" aria-pressed="true"><div><strong>Pakej peniaga</strong><small>50 gubahan HD · RM 0.70 sekeping</small></div><span class="price">RM 35</span></div>
+    <div class="btn-row">
+      <button class="btn btn-rose" id="payBtn">Bayar dengan FPX</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('pay').close()">Nanti dulu</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast"></div>
+
+<script>
+/* ═══════ keadaan ═══════ */
+const S = {
+  img:null, cx:.5, cy:.38, zoom:1.8, rot:0,
+  shape:'round', theme:'rose', ratio:'post',
+  seed:Math.floor(Math.random()*1e5), hd:false, credits:0
+};
+
+const RATIOS = { post:[1080,1350], square:[1080,1080], story:[1080,1920] };
+
+const THEMES = {
+  rose:  { label:'Rose Kita', petal:['#E4879E','#EFA3B6','#F6C6D1','#FBE1E6'], core:'#F7E7D2',
+           leaf:['#5F7F58','#728F66','#4A6845'], wrap:['#E7D3C1','#F4E7DA','#D5BCA7'],
+           ribbon:'#C44C68', bg:['#FFF7F4','#FAE3E5','#F1D2D7'] },
+  raya:  { label:'Pastel Raya', petal:['#E8D6A2','#F2E6BF','#D6E3BC','#FAF3DE'], core:'#EFDDA8',
+           leaf:['#6C8A5C','#7F9D6B','#57714D'], wrap:['#E3DAC4','#F2ECDA','#CFC4A8'],
+           ribbon:'#AC8839', bg:['#FFFDF4','#F5F0DF','#EBE3CE'] },
+  senja: { label:'Senja', petal:['#EE9A7C','#F4B692','#F8D0B2','#FCE5D3'], core:'#F6D9A8',
+           leaf:['#7A8A59','#8D9A67','#606F48'], wrap:['#E8CBB4','#F5E0CA','#D6B69A'],
+           ribbon:'#CE6249', bg:['#FFF6ED','#FAE3D4','#F2D3C0'] }
+};
+
+/* ═══════ utiliti ═══════ */
+const $ = id => document.getElementById(id);
+const rngFrom = a => () => { a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
+
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('on'),2600); }
+
+function shade(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  const f=v=>Math.max(0,Math.min(255,Math.round(v+amt)));
+  return `rgb(${f(n>>16)},${f(n>>8&255)},${f(n&255)})`;
+}
+
+/* ═══════ bingkai muka ═══════ */
+function cropCanvas(size){
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const x=c.getContext('2d');
+  const w=S.img.naturalWidth, h=S.img.naturalHeight;
+  const s=Math.min(w,h)/S.zoom;
+  const sx=Math.max(0,Math.min(w-s, w*S.cx-s/2));
+  const sy=Math.max(0,Math.min(h-s, h*S.cy-s/2));
+  x.save(); x.translate(size/2,size/2); x.rotate(S.rot*Math.PI/180); x.translate(-size/2,-size/2);
+  x.drawImage(S.img, sx, sy, s, s, -size*0.1, -size*0.1, size*1.2, size*1.2);
+  x.restore();
+  return c;
+}
+
+function feathered(size){
+  const c=document.createElement('canvas'); c.width=c.height=size;
+  const x=c.getContext('2d');
+  x.drawImage(cropCanvas(size),0,0);
+  x.globalCompositeOperation='destination-in';
+  const g=x.createRadialGradient(size/2,size/2,size*0.19,size/2,size/2,size*0.50);
+  g.addColorStop(0,'#000'); g.addColorStop(.68,'#000'); g.addColorStop(1,'rgba(0,0,0,0)');
+  x.fillStyle=g; x.fillRect(0,0,size,size);
+  return c;
+}
+
+function drawCropStage(){
+  const cv=$('cropStage'), x=cv.getContext('2d'), n=cv.width;
+  x.clearRect(0,0,n,n);
+  x.drawImage(cropCanvas(n),0,0);
+  x.save();
+  x.fillStyle='rgba(58,28,42,.55)';
+  x.beginPath(); x.rect(0,0,n,n);
+  x.arc(n/2,n/2,n*0.42,0,Math.PI*2,true); x.fill('evenodd');
+  x.strokeStyle='#FFF9F5'; x.lineWidth=2;
+  x.beginPath(); x.arc(n/2,n/2,n*0.42,0,Math.PI*2); x.stroke();
+  x.restore();
+}
+
+/* ═══════ susun atur bunga ═══════ */
+function layout(shape,n,R){
+  const p=[];
+  if(shape==='heart'){
+    const o=n-1;
+    for(let i=0;i<o;i++){
+      const t=Math.PI*2*i/o;
+      const x=16*Math.pow(Math.sin(t),3);
+      const y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+      p.push({x:x*R/16.5, y:-y*R/16.5 - R*0.06});
+    }
+    p.push({x:0,y:-R*0.12});
+  }else{
+    const g=2.399963;
+    for(let i=0;i<n;i++){
+      const rad=R*Math.sqrt((i+0.6)/n), a=i*g;
+      p.push({x:Math.cos(a)*rad, y:Math.sin(a)*rad*0.90});
+    }
+  }
+  return p;
+}
+
+/* ═══════ elemen lukisan ═══════ */
+function leaf(x,cxp,cyp,len,ang,col){
+  x.save(); x.translate(cxp,cyp); x.rotate(ang);
+  x.fillStyle=col;
+  x.beginPath(); x.moveTo(0,0);
+  x.quadraticCurveTo(len*.34,-len*.27,len,0);
+  x.quadraticCurveTo(len*.34, len*.27,0,0);
+  x.fill();
+  x.strokeStyle='rgba(255,255,255,.18)'; x.lineWidth=Math.max(1,len*.018);
+  x.beginPath(); x.moveTo(len*.06,0); x.lineTo(len*.9,0); x.stroke();
+  x.restore();
+}
+
+function bloom(x,face,px,py,r,rng,T){
+  const rot=(rng()-.5)*.45, flip=rng()<.45;
+  const base=T.petal[Math.floor(rng()*T.petal.length)];
+  const nB=8+Math.floor(rng()*3);
+
+  x.save(); x.translate(px,py); x.rotate(rot);
+
+  // kelopak belakang
+  x.save();
+  x.shadowColor='rgba(70,30,45,.20)'; x.shadowBlur=r*.42; x.shadowOffsetY=r*.10;
+  for(let i=0;i<nB;i++){
+    const a=i/nB*Math.PI*2+rng()*.1;
+    x.save(); x.rotate(a);
+    const g=x.createLinearGradient(0,-r*.35,0,-r*1.7);
+    g.addColorStop(0,shade(base,-26)); g.addColorStop(1,shade(base,16));
+    x.fillStyle=g;
+    x.beginPath(); x.ellipse(0,-r*1.02,r*.47,r*.72,0,0,Math.PI*2); x.fill();
+    x.restore();
+  }
+  x.restore();
+
+  // kelopak depan
+  for(let i=0;i<nB;i++){
+    const a=(i+.5)/nB*Math.PI*2;
+    x.save(); x.rotate(a);
+    const g=x.createLinearGradient(0,-r*.3,0,-r*1.3);
+    g.addColorStop(0,shade(base,4)); g.addColorStop(1,shade(base,42));
+    x.fillStyle=g;
+    x.beginPath(); x.ellipse(0,-r*.80,r*.34,r*.55,0,0,Math.PI*2); x.fill();
+    x.restore();
+  }
+
+  // wajah
+  const b=(.96+rng()*.12).toFixed(2), sa=(.94+rng()*.16).toFixed(2);
+  x.save();
+  if(flip) x.scale(-1,1);
+  try{ x.filter=`brightness(${b}) saturate(${sa})`; }catch(e){}
+  x.drawImage(face,-r,-r*1.08,r*2,r*2.16);
+  x.restore();
+
+  // bayang halus di pinggir muka supaya duduk dalam bunga
+  x.save();
+  const ring=x.createRadialGradient(0,0,r*.72,0,0,r*1.06);
+  ring.addColorStop(0,'rgba(70,30,45,0)'); ring.addColorStop(1,'rgba(70,30,45,.16)');
+  x.fillStyle=ring; x.beginPath(); x.ellipse(0,0,r*1.06,r*1.16,0,0,Math.PI*2); x.fill();
+  x.restore();
+
+  x.restore();
+}
+
+let grainPat=null;
+function grain(x,w,h){
+  if(!grainPat){
+    const g=document.createElement('canvas'); g.width=g.height=160;
+    const gx=g.getContext('2d'), d=gx.createImageData(160,160);
+    for(let i=0;i<d.data.length;i+=4){
+      const v=200+Math.random()*55;
+      d.data[i]=d.data[i+1]=d.data[i+2]=v; d.data[i+3]=255;
+    }
+    gx.putImageData(d,0,0); grainPat=x.createPattern(g,'repeat');
+  }
+  x.save(); x.globalAlpha=.055; x.globalCompositeOperation='multiply';
+  x.fillStyle=grainPat; x.fillRect(0,0,w,h); x.restore();
+}
+
+/* ═══════ gubahan penuh ═══════ */
+function compose(){
+  const [W,H]=RATIOS[S.ratio];
+  const T=THEMES[S.theme];
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const rng=rngFrom(S.seed);
+
+  // latar
+  const bg=x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,T.bg[0]); bg.addColorStop(.55,T.bg[1]); bg.addColorStop(1,T.bg[2]);
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+  const glow=x.createRadialGradient(W/2,H*.34,40,W/2,H*.34,W*.68);
+  glow.addColorStop(0,'rgba(255,255,255,.8)'); glow.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=glow; x.fillRect(0,0,W,H);
+
+  const counts={round:9,heart:13,lush:17};
+  const n=counts[S.shape];
+  const cxp=W/2, cyp=H*(S.ratio==='story'?.34:.38);
+  const R=W*(S.shape==='heart'?.315:.30);
+  const faceR=W*.108*Math.sqrt(9/n)*(S.shape==='heart'?.98:1.06);
+
+  // kon pembalut
+  const topY=cyp+R*.94, tipY=H*(S.ratio==='story'?.86:.90), halfW=R*1.05;
+  const paper=x.createLinearGradient(cxp-halfW,topY,cxp+halfW,tipY);
+  paper.addColorStop(0,T.wrap[0]); paper.addColorStop(.5,T.wrap[1]); paper.addColorStop(1,T.wrap[2]);
+  x.save(); x.shadowColor='rgba(80,45,40,.20)'; x.shadowBlur=W*.035; x.shadowOffsetY=W*.012;
+  x.fillStyle=paper;
+  x.beginPath(); x.moveTo(cxp-halfW,topY); x.lineTo(cxp+halfW,topY);
+  x.lineTo(cxp+W*.035,tipY); x.lineTo(cxp-W*.035,tipY); x.closePath(); x.fill();
+  x.restore();
+  x.fillStyle='rgba(255,255,255,.30)';
+  x.beginPath(); x.moveTo(cxp-halfW*.6,topY); x.lineTo(cxp+halfW*.08,topY);
+  x.lineTo(cxp-W*.008,tipY); x.lineTo(cxp-W*.035,tipY); x.closePath(); x.fill();
+  x.strokeStyle='rgba(110,70,55,.16)'; x.lineWidth=W*.0028;
+  x.beginPath(); x.moveTo(cxp+halfW*.34,topY); x.lineTo(cxp+W*.016,tipY); x.stroke();
+
+  // dedaun
+  for(let i=0;i<54;i++){
+    const a=rng()*Math.PI*2, rad=R*(.84+rng()*.44);
+    leaf(x, cxp+Math.cos(a)*rad, cyp+Math.sin(a)*rad*.88,
+         W*.075+rng()*W*.085, a+(rng()-.5)*.6, T.leaf[Math.floor(rng()*T.leaf.length)]);
+  }
+
+  // bunga kecil putih
+  for(let i=0;i<26;i++){
+    const a=rng()*Math.PI*2, rad=R*(.92+rng()*.36);
+    const bx=cxp+Math.cos(a)*rad, by=cyp+Math.sin(a)*rad*.88;
+    x.fillStyle='rgba(255,255,255,.85)';
+    for(let k=0;k<5;k++){
+      const aa=rng()*Math.PI*2, rr=W*.012+rng()*W*.014;
+      x.beginPath(); x.arc(bx+Math.cos(aa)*rr, by+Math.sin(aa)*rr, W*.0055, 0, Math.PI*2); x.fill();
+    }
+  }
+
+  // wajah
+  const face=feathered(560);
+  layout(S.shape,n,R)
+    .map(p=>({x:cxp+p.x+(rng()-.5)*W*.022, y:cyp+p.y+(rng()-.5)*W*.022, s:.88+rng()*.26}))
+    .sort((a,b)=>a.y-b.y)
+    .forEach(p=>bloom(x,face,p.x,p.y,faceR*p.s,rng,T));
+
+  // reben
+  const ry=topY+H*.045;
+  x.save();
+  x.fillStyle=T.ribbon;
+  x.beginPath(); x.ellipse(cxp-W*.082,ry,W*.068,W*.035,-.34,0,Math.PI*2); x.fill();
+  x.beginPath(); x.ellipse(cxp+W*.082,ry,W*.068,W*.035, .34,0,Math.PI*2); x.fill();
+  x.fillStyle=shade(T.ribbon,-26);
+  x.beginPath(); x.moveTo(cxp-W*.012,ry); x.lineTo(cxp-W*.062,ry+H*.075); x.lineTo(cxp-W*.016,ry+H*.058); x.closePath(); x.fill();
+  x.beginPath(); x.moveTo(cxp+W*.012,ry); x.lineTo(cxp+W*.062,ry+H*.075); x.lineTo(cxp+W*.016,ry+H*.058); x.closePath(); x.fill();
+  x.fillStyle=shade(T.ribbon,22);
+  x.beginPath(); x.ellipse(cxp,ry,W*.030,W*.026,0,0,Math.PI*2); x.fill();
+  x.restore();
+
+  // kata-kata
+  const nm=$('name').value.trim(), ms=$('msg').value.trim();
+  x.textAlign='center'; x.textBaseline='alphabetic';
+  if(nm){
+    x.fillStyle=shade(T.ribbon,-60);
+    x.font=`500 italic ${W*.082}px Fraunces, serif`;
+    x.fillText(nm, cxp, H*(ms?.945:.962));
+  }
+  if(ms){
+    x.fillStyle='rgba(58,28,42,.62)';
+    x.font=`400 ${W*.026}px "DM Sans", sans-serif`;
+    x.fillText(ms.toUpperCase(), cxp, H*.975);
+  }
+
+  grain(x,W,H);
+
+  // vignet
+  const vg=x.createRadialGradient(W/2,H/2,W*.35,W/2,H/2,W*.78);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(70,30,45,.10)');
+  x.fillStyle=vg; x.fillRect(0,0,W,H);
+
+  if(!S.hd){
+    x.save();
+    x.globalAlpha=.5; x.textAlign='right';
+    x.fillStyle='#3A1C2A';
+    x.font=`500 ${W*.019}px "IBM Plex Mono", monospace`;
+    x.fillText('SEKUNTUM.MY', W-W*.045, H-W*.035);
+    x.restore();
+  }
+  return c;
+}
+
+/* ═══════ render langsung ═══════ */
+let pending=false, out=null;
+function render(){
+  if(!S.img || pending) return;
+  pending=true;
+  requestAnimationFrame(()=>{
+    out=compose();
+    const p=$('preview');
+    p.width=out.width; p.height=out.height;
+    p.getContext('2d').drawImage(out,0,0);
+    p.classList.add('on');
+    $('empty').hidden=true; $('actions').hidden=false; $('lockNote').hidden=S.hd;
+    drawCropStage();
+    pending=false;
+  });
+}
+
+/* ═══════ input ═══════ */
+$('file').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const im=new Image();
+    im.onload=()=>{ S.img=im; S.cx=.5; S.cy=.38; $('cropWrap').hidden=false; render(); toast('Tarik bulatan untuk letak muka'); };
+    im.onerror=()=>toast('Fail itu tak dapat dibaca. Cuba PNG atau JPG.');
+    im.src=ev.target.result;
+  };
+  r.readAsDataURL(f);
+});
+
+$('zoom').addEventListener('input',e=>{ S.zoom=+e.target.value/10; render(); });
+$('rot').addEventListener('input',e=>{ S.rot=+e.target.value; render(); });
+['name','msg'].forEach(id=>$(id).addEventListener('input',render));
+
+// tarik bingkai
+(function(){
+  const cv=$('cropStage'); let drag=false, lx=0, ly=0;
+  cv.addEventListener('pointerdown',e=>{ if(!S.img)return; drag=true; lx=e.clientX; ly=e.clientY; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const k=1/(cv.clientWidth*S.zoom);
+    S.cx=Math.max(.05,Math.min(.95,S.cx-(e.clientX-lx)*k));
+    S.cy=Math.max(.05,Math.min(.95,S.cy-(e.clientY-ly)*k));
+    lx=e.clientX; ly=e.clientY; render();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
+})();
+
+// chip
+function chipGroup(id,key){
+  $(id).addEventListener('click',e=>{
+    const b=e.target.closest('.chip'); if(!b) return;
+    [...$(id).children].forEach(c=>c.setAttribute('aria-pressed', c===b));
+    S[key]=b.dataset[key]; render();
+  });
+}
+chipGroup('shapes','shape');
+chipGroup('ratios','ratio');
+
+// swatch tema
+Object.entries(THEMES).forEach(([k,t])=>{
+  const b=document.createElement('button');
+  b.className='sw'; b.title=t.label; b.setAttribute('aria-pressed', k===S.theme);
+  b.setAttribute('aria-label','Warna '+t.label);
+  t.petal.slice(0,3).concat(t.leaf[0]).forEach(col=>{
+    const s=document.createElement('span'); s.style.background=col; b.appendChild(s);
+  });
+  b.onclick=()=>{ S.theme=k; [...$('themes').children].forEach(c=>c.setAttribute('aria-pressed',c===b)); render(); };
+  $('themes').appendChild(b);
+});
+
+// tindakan
+$('shuffleBtn').onclick=()=>{ S.seed=Math.floor(Math.random()*1e5); render(); };
+
+$('dlBtn').onclick=()=>{
+  if(!out) return;
+  const a=document.createElement('a');
+  a.download=`bouquet-${S.shape}-${Date.now()}.png`;
+  a.href=out.toDataURL('image/png'); a.click();
+  toast(S.hd?'Fail HD dimuat turun':'Dimuat turun · versi bertanda air');
+};
+
+$('shareBtn').onclick=async()=>{
+  if(!out) return;
+  out.toBlob(async blob=>{
+    const file=new File([blob],'bouquet.png',{type:'image/png'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file], text:'Bouquet wajah dari Sekuntum Studio'}); }
+      catch(err){ /* pengguna batalkan */ }
+    }else{
+      $('dlBtn').click();
+      toast('Peranti ini tiada kongsi terus — fail dimuat turun');
+    }
+  },'image/png');
+};
+
+$('unlockLink').onclick=e=>{ e.preventDefault(); $('pay').showModal(); };
+
+let plan=50;
+document.querySelectorAll('.plan').forEach(p=>{
+  p.onclick=()=>{ plan=+p.dataset.plan;
+    document.querySelectorAll('.plan').forEach(q=>q.setAttribute('aria-pressed',q===p)); };
+});
+$('payBtn').onclick=()=>{
+  $('pay').close(); S.hd=true; S.credits+=plan; render();
+  toast(`Pembayaran berjaya · ${plan} muat turun HD dibuka`);
+};
+
+document.fonts && document.fonts.ready.then(()=>{ if(S.img) render(); });
+</script>
+</body>
+</html>
