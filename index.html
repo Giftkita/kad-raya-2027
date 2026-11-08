@@ -139,7 +139,31 @@
 
 <script>
 // ================= CONFIG =================
-const MODEL = 'gemini-2.5-flash-image';   // model imej Gemini (nano banana)
+// Senarai model ikut keutamaan — kalau yang pertama "not found / no longer available", cuba seterusnya
+const IMAGE_MODELS = ['gemini-3.1-flash-lite-image', 'gemini-nano-banana-2.1', 'gemini-2.5-flash-image'];
+const TEXT_MODELS  = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+
+// Panggil Gemini dengan fallback model
+async function callGemini(models, body){
+  let lastErr;
+  for (const m of models) {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if (r.ok) return j;
+    const msg = j.error?.message || `HTTP ${r.status}`;
+    lastErr = new Error(msg);
+    const retryable = r.status === 404 || /not found|no longer available|not supported|deprecated/i.test(msg);
+    if (!retryable) break;        // error lain (quota/billing/key) — tak guna cuba model lain
+    console.warn(`Model ${m} tak tersedia, cuba seterusnya...`);
+  }
+  // mesej mesra untuk error biasa
+  const m = lastErr.message;
+  if (/quota|billing|free tier|limit: 0/i.test(m)) throw new Error('Kuota habis / model ni perlukan billing. Tekan "Set up billing" dalam AI Studio untuk aktifkan.');
+  if (/API key not valid|API_KEY_INVALID/i.test(m)) throw new Error('API key tak sah. Semak semula key dalam AI Studio.');
+  throw lastErr;
+}
 const PROMPT = `You are a virtual try-on engine. Image 1 is a photo of a person. Image 2 is a garment product photo.
 Generate a photorealistic version of Image 1 where the SAME person is wearing the garment from Image 2.
 Keep the person's face, hair, skin tone, body shape, pose, hands, phone, background, lighting and camera angle EXACTLY the same.
@@ -298,11 +322,7 @@ async function generate(){
       ]}],
       generationConfig: { responseModalities: ['IMAGE'] }
     };
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
-    });
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+    const j = await callGemini(IMAGE_MODELS, body);
     const part = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
     if (!part) throw new Error('AI tak pulangkan gambar. Cuba gambar lain / baju lain.');
     const out = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
@@ -333,7 +353,6 @@ function updateButtons(){
   $('status').textContent = selectedGarment ? `Baju dipilih: ${selectedGarment.name}` : '';
 }
 // ================= CADANGAN GAYA & SAIZ =================
-const TEXT_MODEL = 'gemini-2.5-flash';
 function garmentNames(){ return [...document.querySelectorAll('.garments .g:not(.add)')].map(d => d.title); }
 
 async function analyse(){
@@ -367,11 +386,7 @@ Kalau tiada tinggi/berat, anggar saiz dari foto tapi nyatakan ia anggaran kasar.
       contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: oMime, data: oB64 } }] }],
       generationConfig: { responseMimeType: 'application/json', temperature: 0.6 }
     };
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
-    });
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+    const j = await callGemini(TEXT_MODELS, body);
     const txt = j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
     const data = JSON.parse(txt.replace(/^```json|```$/g, '').trim());
     renderAdvice(data);
