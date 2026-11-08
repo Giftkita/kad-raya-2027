@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Try-On</title>
+<style>
+  :root{--bg:#f6f6f8;--card:#fff;--line:#e4e4ea;--text:#15151c;--muted:#7a7a88;--accent:#2d5bff;--accent2:#ff4f7b}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;font-weight:700}
+  header h1 span{color:var(--accent)}
+  .key{display:flex;gap:6px;align-items:center}
+  .key input{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;width:220px}
+  .key small{color:var(--muted);font-size:11px}
+
+  main{display:grid;grid-template-columns:220px 1fr;gap:16px;padding:16px 20px;max-width:1200px;margin:0 auto}
+  @media(max-width:760px){main{grid-template-columns:1fr}aside{order:2}}
+
+  aside{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;height:fit-content}
+  aside h2{font-size:14px;margin-bottom:4px}
+  aside p{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .garments{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .g{aspect-ratio:1;border:2px solid var(--line);border-radius:12px;background:#fafafa;display:flex;align-items:center;justify-content:center;cursor:grab;overflow:hidden;position:relative;transition:.15s;touch-action:none}
+  .g img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+  .g:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .g.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,91,255,.2)}
+  .g .del{position:absolute;top:4px;right:4px;background:#fff;border:1px solid var(--line);border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none}
+  .g:hover .del{display:block}
+  .g.add{border-style:dashed;cursor:pointer;color:var(--muted);font-size:12px;flex-direction:column;gap:4px}
+  .g.add b{font-size:22px;color:var(--accent)}
+
+  section{display:flex;flex-direction:column;gap:12px}
+  .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .stage h2{font-size:15px}
+  .stage p.sub{font-size:12px;color:var(--muted);margin:2px 0 12px}
+  .drop{position:relative;border:2px dashed var(--line);border-radius:14px;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafafa;transition:.15s}
+  .drop.over{border-color:var(--accent);background:#eef2ff}
+  .drop.empty{cursor:pointer}
+  .drop img{max-width:100%;max-height:70vh;display:block;border-radius:10px}
+  .drop .ph{text-align:center;color:var(--muted);font-size:13px;padding:30px}
+  .drop .ph b{display:block;font-size:40px;margin-bottom:8px}
+  .busy{position:absolute;inset:0;background:rgba(255,255,255,.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:13px;color:var(--muted);backdrop-filter:blur(4px)}
+  .busy.show{display:flex}
+  .spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .tag{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:4px 10px;border-radius:999px}
+
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{background:var(--card);border:1px solid var(--line);color:var(--text);padding:9px 14px;border-radius:10px;font-size:13px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  input[type=file]{display:none}
+  .history{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
+  .history img{height:70px;border-radius:8px;border:2px solid var(--line);cursor:pointer}
+  .history img.active{border-color:var(--accent)}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c1c24;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:30;max-width:90vw;text-align:center}
+  #toast.show{opacity:1}
+  .num{border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:13px;width:120px;background:#fff}
+  .advice{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafafa}
+  .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .card p{font-size:13px;line-height:1.45}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{font-size:12px;padding:5px 10px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+  .chip.bad{border-color:#f3b9c6;background:#fff3f6;color:#a1183b}
+  .chip.pick{border-color:var(--accent);color:var(--accent);cursor:pointer;font-weight:600}
+  .chip.pick:hover{background:#eef2ff}
+  .colors{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .colors span{display:flex;align-items:center;gap:5px;font-size:12px}
+  .colors i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:inline-block}
+  .size{font-size:34px;font-weight:800;color:var(--accent);line-height:1}
+  .size small{font-size:13px;color:var(--muted);font-weight:500;margin-left:6px}
+  .ghost{position:fixed;width:80px;height:80px;pointer-events:none;z-index:50;opacity:.85;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25));display:none}
+  .ghost img{width:100%;height:100%;object-fit:contain}
+</style>
+</head>
+<body>
+<header>
+  <h1>Live <span>Try-On</span></h1>
+  <div class="key">
+    <input id="apiKey" type="password" placeholder="Gemini API key (disimpan dalam browser)">
+    <small id="keyStatus"></small>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <h2>Pilih baju</h2>
+    <p>Seret baju ke atas gambar kau. Boleh tambah gambar baju sendiri (PNG/JPG, latar putih lagi bagus).</p>
+    <div class="garments" id="garments">
+      <label class="g add" for="garmentFile"><b>+</b>Tambah baju</label>
+    </div>
+    <input type="file" id="garmentFile" accept="image/*" multiple>
+  </aside>
+
+  <section>
+    <div class="stage">
+      <h2>Gambar kau</h2>
+      <p class="sub">Upload selfie badan penuh / separuh badan, cahaya terang. Lepas tu seret baju ke atasnya.</p>
+      <div class="drop empty" id="drop">
+        <div class="ph" id="ph"><b>📸</b>Klik atau seret gambar kau ke sini</div>
+        <img id="photo" style="display:none" alt="">
+        <span class="tag" id="tag" style="display:none"></span>
+        <div class="busy" id="busy"><div class="spinner"></div><span id="busyText">AI sedang pasangkan baju...</span></div>
+      </div>
+      <input type="file" id="photoFile" accept="image/*">
+    </div>
+
+    <div class="bar">
+      <button class="btn primary" id="btnGenerate" disabled>✨ Pakai baju</button>
+      <button class="btn" id="btnOriginal" disabled>Asal</button>
+      <button class="btn" id="btnDownload" disabled>⬇ Muat turun</button>
+      <button class="btn" id="btnNewPhoto">Tukar gambar</button>
+      <span id="status" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+
+    <div class="history" id="history"></div>
+
+    <!-- ===== CADANGAN AI ===== -->
+    <div class="stage" id="advisor">
+      <h2>Cadangan gaya & saiz</h2>
+      <p class="sub">AI tengok gambar kau dan cadangkan warna, gaya dan anggaran saiz. Isi tinggi/berat untuk saiz lebih tepat.</p>
+      <div class="bar" style="margin-bottom:10px">
+        <input class="num" id="tinggi" type="number" placeholder="Tinggi (cm)" min="120" max="230">
+        <input class="num" id="berat" type="number" placeholder="Berat (kg)" min="30" max="250">
+        <select id="jantina" class="num"><option value="">Jantina (pilihan)</option><option value="lelaki">Lelaki</option><option value="perempuan">Perempuan</option></select>
+        <button class="btn primary" id="btnAnalyse" disabled>🔍 Analisis gaya saya</button>
+      </div>
+      <div id="adviceOut"></div>
+    </div>
+  </section>
+</main>
+
+<div class="ghost" id="ghost"><img id="ghostImg" alt=""></div>
+<div id="toast"></div>
+
+<script>
+// ================= CONFIG =================
+const MODEL = 'gemini-2.5-flash-image';   // model imej Gemini (nano banana)
+const PROMPT = `You are a virtual try-on engine. Image 1 is a photo of a person. Image 2 is a garment product photo.
+Generate a photorealistic version of Image 1 where the SAME person is wearing the garment from Image 2.
+Keep the person's face, hair, skin tone, body shape, pose, hands, phone, background, lighting and camera angle EXACTLY the same.
+Only replace the clothing on the relevant body area with the garment, fitting it naturally to the body with realistic folds, drape and shadows.
+Keep the garment's color, pattern, logo and texture faithful to Image 2. Output only the edited image.`;
+
+// Baju contoh (SVG ringkas) — ganti dengan gambar produk sebenar + link affiliate nanti
+const SAMPLE_GARMENTS = [
+  { name:'T-shirt biru', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 15 L45 10 Q50 20 55 10 L70 15 L85 30 L72 40 L72 90 L28 90 L28 40 L15 30 Z' fill='%232d5bff'/></svg>` },
+  { name:'Hoodie kelabu', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M28 18 L42 8 Q50 22 58 8 L72 18 L88 34 L74 44 L74 92 L26 92 L26 44 L12 34 Z' fill='%23b8b8c2'/><circle cx='50' cy='14' r='9' fill='%239a9aa8'/><path d='M38 60 h24 v16 h-24z' fill='%23a3a3ae'/></svg>` },
+  { name:'Jaket kuning', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M28 18 L44 10 L50 20 L56 10 L72 18 L88 34 L74 44 L74 92 L26 92 L26 44 L12 34 Z' fill='%23f7c62a'/><path d='M50 20 v72' stroke='%23c99d0c' stroke-width='3'/></svg>` },
+  { name:'Blazer navy', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M28 18 L44 10 L50 30 L56 10 L72 18 L88 34 L74 44 L74 92 L26 92 L26 44 L12 34 Z' fill='%231d3557'/><path d='M44 10 L50 30 L56 10 L58 45 L50 55 L42 45 Z' fill='%23f0f0f0'/></svg>` },
+];
+
+// ================= STATE =================
+let photoB64 = null, photoMime = 'image/jpeg';
+let originalSrc = null;
+let selectedGarment = null;     // {name, dataUrl}
+let history = [];               // dataUrls
+const $ = id => document.getElementById(id);
+
+function toast(m, ms=3200){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); }
+
+// ================= API KEY =================
+$('apiKey').value = localStorage.getItem('gemini_key') || '';
+function keyOK(){ const ok = $('apiKey').value.trim().length > 20; $('keyStatus').textContent = ok ? '✓' : ''; return ok; }
+$('apiKey').addEventListener('input', () => { localStorage.setItem('gemini_key', $('apiKey').value.trim()); keyOK(); updateButtons(); });
+keyOK();
+
+// ================= GARMENTS =================
+function svgToDataUrl(svg){ return 'data:image/svg+xml;utf8,' + svg; }
+function addGarmentTile(g, removable=false){
+  const d = document.createElement('div');
+  d.className = 'g'; d.title = g.name;
+  d.innerHTML = `<img src="${g.dataUrl}" alt="${g.name}">` + (removable ? `<span class="del">✕</span>` : '');
+  d.addEventListener('click', e => { if (e.target.classList.contains('del')) { d.remove(); if (selectedGarment===g) selectedGarment=null; updateButtons(); return; } selectGarment(g, d); });
+  // drag (pointer events — jalan untuk mouse & sentuh)
+  d.addEventListener('pointerdown', e => startDrag(e, g, d));
+  $('garments').insertBefore(d, $('garments').lastElementChild);
+}
+function selectGarment(g, tile){
+  selectedGarment = g;
+  document.querySelectorAll('.g').forEach(x=>x.classList.remove('active'));
+  if (tile) tile.classList.add('active');
+  updateButtons();
+}
+SAMPLE_GARMENTS.forEach(g => addGarmentTile({ name:g.name, dataUrl: svgToDataUrl(g.svg) }));
+
+$('garmentFile').addEventListener('change', async e => {
+  for (const f of e.target.files) {
+    const dataUrl = await fileToDataUrl(f, 1024);
+    addGarmentTile({ name:f.name, dataUrl }, true);
+  }
+  e.target.value = '';
+});
+
+// ---- drag ghost ----
+let drag = null;
+function startDrag(e, g, tile){
+  e.preventDefault();
+  drag = { g, tile, moved:false };
+  $('ghostImg').src = g.dataUrl;
+  moveGhost(e.clientX, e.clientY);
+  $('ghost').style.display = 'block';
+  tile.setPointerCapture(e.pointerId);
+}
+function moveGhost(x,y){ $('ghost').style.left = (x-40)+'px'; $('ghost').style.top = (y-40)+'px'; }
+window.addEventListener('pointermove', e => {
+  if (!drag) return; drag.moved = true; moveGhost(e.clientX, e.clientY);
+  const over = isOverDrop(e.clientX, e.clientY);
+  $('drop').classList.toggle('over', over);
+});
+window.addEventListener('pointerup', e => {
+  if (!drag) return;
+  $('ghost').style.display = 'none';
+  $('drop').classList.remove('over');
+  const over = isOverDrop(e.clientX, e.clientY);
+  selectGarment(drag.g, drag.tile);
+  if (drag.moved && over) {
+    if (!photoB64) toast('Upload gambar kau dulu');
+    else generate();
+  }
+  drag = null;
+});
+function isOverDrop(x,y){ const r=$('drop').getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
+
+// ================= PHOTO =================
+$('drop').addEventListener('click', () => { if (!photoB64) $('photoFile').click(); });
+$('btnNewPhoto').addEventListener('click', () => $('photoFile').click());
+$('photoFile').addEventListener('change', e => { const f=e.target.files[0]; if (f) loadPhoto(f); e.target.value=''; });
+$('drop').addEventListener('dragover', e => { e.preventDefault(); $('drop').classList.add('over'); });
+$('drop').addEventListener('dragleave', () => $('drop').classList.remove('over'));
+$('drop').addEventListener('drop', e => { e.preventDefault(); $('drop').classList.remove('over'); const f=e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) loadPhoto(f); });
+
+async function loadPhoto(file){
+  const dataUrl = await fileToDataUrl(file, 1280);
+  originalSrc = dataUrl;
+  setPhoto(dataUrl, 'Asal');
+  history = []; renderHistory();
+  $('drop').classList.remove('empty'); $('ph').style.display='none';
+  updateButtons();
+}
+function setPhoto(dataUrl, label){
+  $('photo').src = dataUrl; $('photo').style.display='block';
+  $('tag').textContent = label; $('tag').style.display='block';
+  const [meta, b64] = dataUrl.split(',');
+  photoB64 = b64; photoMime = meta.match(/data:(.*?);/)[1];
+}
+
+// resize + compress ke JPEG supaya request kecil
+function fileToDataUrl(file, maxSide){
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
+      const ctx = c.getContext('2d');
+      if (file.type === 'image/png') { ctx.drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/png')); }
+      else { ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/jpeg', 0.9)); }
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// SVG → PNG supaya Gemini boleh baca
+function toPngDataUrl(dataUrl){
+  return new Promise(res => {
+    if (!dataUrl.startsWith('data:image/svg')) return res(dataUrl);
+    const img = new Image();
+    img.onload = () => { const c=document.createElement('canvas'); c.width=512; c.height=512; const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,512,512); x.drawImage(img,0,0,512,512); res(c.toDataURL('image/png')); };
+    img.src = dataUrl;
+  });
+}
+
+// ================= GENERATE =================
+async function generate(){
+  if (!keyOK()) return toast('Masukkan Gemini API key dulu (atas kanan)');
+  if (!photoB64) return toast('Upload gambar kau dulu');
+  if (!selectedGarment) return toast('Pilih baju dulu');
+
+  $('busy').classList.add('show'); $('busyText').textContent = `Pasangkan "${selectedGarment.name}"...`;
+  $('btnGenerate').disabled = true;
+  try {
+    const gUrl = await toPngDataUrl(selectedGarment.dataUrl);
+    const [gMeta, gB64] = gUrl.split(','); const gMime = gMeta.match(/data:(.*?);/)[1];
+    // Guna gambar ASAL sebagai base supaya kualiti tak merosot bila tukar baju banyak kali
+    const [oMeta, oB64] = originalSrc.split(','); const oMime = oMeta.match(/data:(.*?);/)[1];
+
+    const body = {
+      contents: [{ parts: [
+        { text: PROMPT },
+        { inlineData: { mimeType: oMime, data: oB64 } },
+        { inlineData: { mimeType: gMime, data: gB64 } },
+      ]}],
+      generationConfig: { responseModalities: ['IMAGE'] }
+    };
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+    const part = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!part) throw new Error('AI tak pulangkan gambar. Cuba gambar lain / baju lain.');
+    const out = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+    setPhoto(out, selectedGarment.name);
+    history.unshift({ src: out, name: selectedGarment.name }); renderHistory(0);
+    toast('Siap ✓');
+  } catch (err) {
+    console.error(err); toast('Gagal: ' + err.message, 6000);
+  } finally {
+    $('busy').classList.remove('show'); updateButtons();
+  }
+}
+
+function renderHistory(activeIdx=-1){
+  const h = $('history'); h.innerHTML = '';
+  history.forEach((it, i) => {
+    const im = document.createElement('img'); im.src = it.src; im.title = it.name;
+    if (i===activeIdx) im.classList.add('active');
+    im.addEventListener('click', () => { setPhoto(it.src, it.name); renderHistory(i); });
+    h.appendChild(im);
+  });
+}
+function updateButtons(){
+  const has = !!photoB64;
+  $('btnGenerate').disabled = !(has && selectedGarment && keyOK());
+  $('btnOriginal').disabled = !has; $('btnDownload').disabled = !has;
+  $('btnAnalyse').disabled = !(has && keyOK());
+  $('status').textContent = selectedGarment ? `Baju dipilih: ${selectedGarment.name}` : '';
+}
+// ================= CADANGAN GAYA & SAIZ =================
+const TEXT_MODEL = 'gemini-2.5-flash';
+function garmentNames(){ return [...document.querySelectorAll('.garments .g:not(.add)')].map(d => d.title); }
+
+async function analyse(){
+  if (!keyOK()) return toast('Masukkan Gemini API key dulu');
+  if (!originalSrc) return toast('Upload gambar kau dulu');
+  const tinggi = $('tinggi').value, berat = $('berat').value, jantina = $('jantina').value;
+  const info = [tinggi && `tinggi ${tinggi} cm`, berat && `berat ${berat} kg`, jantina && `jantina ${jantina}`].filter(Boolean).join(', ') || 'tiada maklumat tambahan';
+  const katalog = garmentNames();
+
+  const prompt = `Kau seorang penasihat fesyen peribadi. Analisis foto orang ini (${info}).
+Jawab dalam Bahasa Malaysia santai, positif dan hormat — jangan sebut berat badan secara negatif.
+Katalog baju tersedia: ${JSON.stringify(katalog)}.
+Pulangkan JSON sahaja dengan struktur:
+{
+ "bentuk_badan": "nama bentuk badan + 1 ayat ringkas",
+ "tona_kulit": "sejuk/panas/neutral + 1 ayat",
+ "warna_sesuai": [{"nama":"...","hex":"#rrggbb"}],   // 5 warna
+ "warna_elak": ["..."],                              // 2-3
+ "gaya_cuba": ["..."],                               // 4-5 gaya/potongan spesifik, cth "kemeja oversized linen"
+ "gaya_elak": ["..."],                               // 2-3
+ "katalog_padan": ["..."],                           // nama dari katalog yang paling padan (0-3), guna nama TEPAT
+ "saiz": {"anggaran":"S/M/L/XL/XXL/3XL","julat":"cth M-L","nota":"1 ayat: asas anggaran & peringatan rujuk carta penjual"},
+ "tip": "1-2 ayat tip styling paling berguna untuk orang ini"
+}
+Kalau tiada tinggi/berat, anggar saiz dari foto tapi nyatakan ia anggaran kasar.`;
+
+  $('btnAnalyse').disabled = true; $('adviceOut').innerHTML = `<p style="font-size:13px;color:var(--muted)">⏳ AI sedang analisis...</p>`;
+  try {
+    const [oMeta, oB64] = originalSrc.split(','); const oMime = oMeta.match(/data:(.*?);/)[1];
+    const body = {
+      contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: oMime, data: oB64 } }] }],
+      generationConfig: { responseMimeType: 'application/json', temperature: 0.6 }
+    };
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error?.message || `HTTP ${r.status}`);
+    const txt = j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+    const data = JSON.parse(txt.replace(/^```json|```$/g, '').trim());
+    renderAdvice(data);
+  } catch (err) {
+    console.error(err); $('adviceOut').innerHTML = `<p style="font-size:13px;color:#a1183b">Gagal: ${err.message}</p>`;
+  } finally { $('btnAnalyse').disabled = false; }
+}
+
+function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderAdvice(d){
+  const chips = (arr, cls='') => (arr||[]).map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join('');
+  const names = garmentNames();
+  const picks = (d.katalog_padan||[]).filter(n => names.includes(n));
+  $('adviceOut').innerHTML = `
+    <div class="advice">
+      <div class="card"><h3>Anggaran saiz</h3>
+        <div class="size">${esc(d.saiz?.anggaran||'-')}<small>${esc(d.saiz?.julat||'')}</small></div>
+        <p style="margin-top:6px;color:var(--muted)">${esc(d.saiz?.nota||'')}</p></div>
+      <div class="card"><h3>Bentuk badan</h3><p>${esc(d.bentuk_badan)}</p></div>
+      <div class="card"><h3>Tona kulit</h3><p>${esc(d.tona_kulit)}</p>
+        <div class="colors">${(d.warna_sesuai||[]).map(c => `<span><i style="background:${esc(c.hex)}"></i>${esc(c.nama)}</span>`).join('')}</div>
+        ${d.warna_elak?.length ? `<div class="chips">${chips(d.warna_elak,'bad')}</div>` : ''}</div>
+      <div class="card"><h3>Gaya untuk cuba</h3><div class="chips">${chips(d.gaya_cuba)}</div>
+        ${d.gaya_elak?.length ? `<h3 style="margin-top:10px">Kurang sesuai</h3><div class="chips">${chips(d.gaya_elak,'bad')}</div>` : ''}</div>
+      <div class="card" style="grid-column:1/-1"><h3>Tip</h3><p>${esc(d.tip)}</p>
+        ${picks.length ? `<h3 style="margin-top:10px">Padan dari katalog — klik untuk pakai</h3><div class="chips" id="pickChips">${picks.map(n => `<span class="chip pick" data-name="${esc(n)}">👕 ${esc(n)}</span>`).join('')}</div>` : ''}
+      </div>
+    </div>`;
+  document.querySelectorAll('#pickChips .chip').forEach(ch => ch.addEventListener('click', () => {
+    const tile = [...document.querySelectorAll('.garments .g')].find(t => t.title === ch.dataset.name);
+    if (!tile) return;
+    tile.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    generate();
+  }));
+}
+$('btnAnalyse').addEventListener('click', analyse);
+
+$('btnGenerate').addEventListener('click', generate);
+$('btnOriginal').addEventListener('click', () => { if (originalSrc) { setPhoto(originalSrc,'Asal'); renderHistory(-1); } });
+$('btnDownload').addEventListener('click', () => { const a=document.createElement('a'); a.href=$('photo').src; a.download='tryon.png'; a.click(); });
+</script>
+</body>
+</html>
