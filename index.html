@@ -4,185 +4,350 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Live Try-On</title>
+<meta name="description" content="Bilik persalinan AI. Upload gambar kau, pilih outfit, tengok hasilnya sebelum beli.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;1,6..96,500;1,6..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#f6f6f8;--card:#fff;--line:#e4e4ea;--text:#15151c;--muted:#7a7a88;--accent:#2d5bff;--accent2:#ff4f7b}
+  /* Idea susun atur: cermin bilik persalinan (bingkai plum, bucu atas melengkung) sebagai tumpuan; almari dan pilihan di sebelah (desktop) atau di bawah (telefon). Satu tema terang secara sengaja. */
+  :root{
+    --porcelain:#EFEDF3; --paper:#FBFAFD; --ink:#23142B; --plum:#3A1F47; --soft:#6E6277; --line:#DDD8E4;
+    --rose:#E8305A; --mint:#BFEFDD; --mint-deep:#1E7A5C;
+    --display:"Bodoni Moda","Didot","Times New Roman",serif;
+    --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+    color-scheme:light;
+  }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:5}
-  header h1{font-size:17px;font-weight:700}
-  header h1 span{color:var(--accent)}
-  .key{display:flex;gap:6px;align-items:center}
-  .key input{border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;width:220px}
-  .key small{color:var(--muted);font-size:11px}
-
-  main{display:grid;grid-template-columns:220px 1fr;gap:16px;padding:16px 20px;max-width:1200px;margin:0 auto}
-  @media(max-width:760px){main{grid-template-columns:1fr}aside{order:2}}
-
-  aside{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;height:fit-content}
-  aside h2{font-size:14px;margin-bottom:4px}
-  aside p{font-size:12px;color:var(--muted);margin-bottom:12px}
-  .garments{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .g{aspect-ratio:1;border:2px solid var(--line);border-radius:12px;background:#fafafa;display:flex;align-items:center;justify-content:center;cursor:grab;overflow:hidden;position:relative;transition:.15s;touch-action:none}
-  .g img{width:100%;height:100%;object-fit:contain;pointer-events:none}
-  .g:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .g.active{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,91,255,.2)}
-  .g .del{position:absolute;top:4px;right:4px;background:#fff;border:1px solid var(--line);border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none}
-  .g:hover .del{display:block}
-  .g.add{border-style:dashed;cursor:pointer;color:var(--muted);font-size:12px;flex-direction:column;gap:4px}
-  .g.add b{font-size:22px;color:var(--accent)}
-
-  section{display:flex;flex-direction:column;gap:12px}
-  .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
-  .stage h2{font-size:15px}
-  .stage p.sub{font-size:12px;color:var(--muted);margin:2px 0 12px}
-  .drop{position:relative;border:2px dashed var(--line);border-radius:14px;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafafa;transition:.15s}
-  .drop.over{border-color:var(--accent);background:#eef2ff}
-  .drop.empty{cursor:pointer}
-  .drop img{max-width:100%;max-height:70vh;display:block;border-radius:10px}
-  .drop .ph{text-align:center;color:var(--muted);font-size:13px;padding:30px}
-  .drop .ph b{display:block;font-size:40px;margin-bottom:8px}
-  .busy{position:absolute;inset:0;background:rgba(255,255,255,.85);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:13px;color:var(--muted);backdrop-filter:blur(4px)}
-  .busy.show{display:flex}
-  .spinner{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .tag{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:4px 10px;border-radius:999px}
-
-  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{background:var(--card);border:1px solid var(--line);color:var(--text);padding:9px 14px;border-radius:10px;font-size:13px;cursor:pointer;transition:.15s}
-  .btn:hover{border-color:var(--accent)}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--porcelain);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;min-height:100vh;-webkit-font-smoothing:antialiased}
+  button,input,select{font:inherit;color:inherit}
+  :focus-visible{outline:3px solid var(--rose);outline-offset:2px}
   input[type=file]{display:none}
-  .history{display:flex;gap:8px;overflow-x:auto;padding:4px 0}
-  .history img{height:70px;border-radius:8px;border:2px solid var(--line);cursor:pointer}
-  .history img.active{border-color:var(--accent)}
-  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c1c24;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:30;max-width:90vw;text-align:center}
-  #toast.show{opacity:1}
-  .num{border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:13px;width:120px;background:#fff}
-  .advice{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-  .card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fafafa}
-  .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
-  .card p{font-size:13px;line-height:1.45}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-  .chip{font-size:12px;padding:5px 10px;border-radius:999px;background:#fff;border:1px solid var(--line)}
-  .chip.bad{border-color:#f3b9c6;background:#fff3f6;color:#a1183b}
-  .chip.pick{border-color:var(--accent);color:var(--accent);cursor:pointer;font-weight:600}
-  .chip.pick:hover{background:#eef2ff}
-  .colors{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-  .colors span{display:flex;align-items:center;gap:5px;font-size:12px}
-  .colors i{width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);display:inline-block}
-  .size{font-size:34px;font-weight:800;color:var(--accent);line-height:1}
-  .size small{font-size:13px;color:var(--muted);font-weight:500;margin-left:6px}
-  .ghost{position:fixed;width:80px;height:80px;pointer-events:none;z-index:50;opacity:.85;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25));display:none}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;background:var(--ink);color:var(--paper);position:sticky;top:0;z-index:8}
+  .wordmark{font-family:var(--display);font-style:italic;font-weight:700;font-size:24px;letter-spacing:-.01em;line-height:1}
+  .pill{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:var(--paper);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .pill.warn{background:var(--rose);border-color:var(--rose)}
+  #settings{display:none;background:var(--plum);color:var(--paper);padding:16px 18px}
+  #settings.show{display:block}
+  #settings .in{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+  #settings label{font-size:13px;font-weight:700}
+  #settings input{border:0;border-radius:12px;padding:12px 14px;font-size:15px;width:100%;background:var(--paper);color:var(--ink)}
+  #settings small{font-size:12px;opacity:.85}
+  #settings a{color:var(--mint);font-weight:600}
+
+  main{max-width:1180px;margin:0 auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:16px}
+  .side{display:flex;flex-direction:column;gap:16px;min-width:0}
+  h2{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;line-height:1.1}
+  .sub{font-size:13px;color:var(--soft);margin-top:4px}
+  .panel{background:var(--paper);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+
+  /* ===== Cermin ===== */
+  .mirror{background:linear-gradient(160deg,var(--plum),var(--ink));padding:9px;border-radius:46px 46px 24px 24px;box-shadow:0 18px 40px -18px rgba(35,20,43,.55)}
+  .drop{position:relative;border-radius:38px 38px 16px 16px;min-height:420px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(180deg,#fff,#E9E5F0)}
+  .drop.empty{cursor:pointer}
+  .drop.over{box-shadow:inset 0 0 0 4px var(--mint)}
+  .ph{text-align:center;padding:34px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .ph svg{width:96px;height:72px;stroke:var(--plum);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+  .ph h1{font-family:var(--display);font-weight:600;font-size:30px;line-height:1.05;letter-spacing:-.015em;text-wrap:balance;max-width:11em}
+  .ph p{font-size:14px;color:var(--soft);max-width:26em}
+  .frame{position:relative;display:none;line-height:0;--p:50%}
+  .frame img{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  #photo{max-width:100%;max-height:74vh;display:block}
+  .orig{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;clip-path:inset(0 calc(100% - var(--p)) 0 0)}
+  .divider{display:none;position:absolute;top:0;bottom:0;left:var(--p);width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+  .divider::after{content:"";position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+  #cmp{display:none;position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0;touch-action:pan-y}
+  .frame.cmp .orig,.frame.cmp .divider,.frame.cmp #cmp{display:block}
+  .lbl{position:absolute;bottom:12px;background:rgba(35,20,43,.78);color:#fff;font-size:12px;font-weight:600;line-height:1.3;padding:5px 11px;border-radius:999px;pointer-events:none;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #tag{left:12px} #tagR{right:12px;display:none}
+  .frame.cmp #tagR{display:block}
+  #btnCmp{position:absolute;top:14px;right:14px;z-index:2;display:none;background:rgba(255,255,255,.92);border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+  #btnCmp[aria-pressed=true]{background:var(--ink);color:#fff}
+  .busy{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:flex-end;padding:22px;background:rgba(35,20,43,.42);backdrop-filter:blur(3px);color:#fff;font-size:14px;font-weight:600;text-align:center;line-height:1.4}
+  .busy.show{display:flex}
+  .busy::before{content:"";position:absolute;left:0;right:0;height:90px;top:0;background:linear-gradient(180deg,transparent,rgba(191,239,221,.75),transparent);animation:scan 1.9s ease-in-out infinite alternate}
+  @keyframes scan{from{transform:translateY(-90px)}to{transform:translateY(74vh)}}
+  .drop::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-60%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.75),transparent);pointer-events:none;z-index:2}
+  .drop.glint::after{animation:glint .9s ease-out 1}
+  @keyframes glint{to{left:130%}}
+  .privacy{font-size:11.5px;color:var(--soft);padding:0 8px;margin-top:8px}
+
+  /* ===== Almari ===== */
+  .rail{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity}
+  .g{flex:none;width:132px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);display:flex;flex-direction:column;cursor:pointer;overflow:hidden;position:relative;scroll-snap-align:start;user-select:none;-webkit-user-select:none}
+  .g img,.g .txt{width:100%;aspect-ratio:4/5;object-fit:contain;pointer-events:none;background:#fff}
+  .g .txt{background:var(--mint);display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;font-family:var(--display);font-style:italic;font-size:17px;line-height:1.15;overflow:hidden}
+  .g.active{box-shadow:inset 0 0 0 3px var(--mint-deep)}
+  .g.active::after{content:"✓";position:absolute;top:8px;left:8px;width:24px;height:24px;border-radius:50%;background:var(--mint-deep);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center}
+  .g .del{position:absolute;top:6px;right:6px;background:#fff;border-radius:50%;width:26px;height:26px;font-size:12px;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  .g .meta{padding:8px 9px 10px;display:flex;flex-direction:column;gap:5px;font-size:12px;line-height:1.25}
+  .g .meta .nm{font-weight:600;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .g .meta .row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+  .g .meta b{font-size:13px}
+  .g .meta .buy{background:var(--rose);color:#fff;padding:4px 11px;border-radius:999px;text-decoration:none;font-weight:700;font-size:11px}
+  .g.add{width:104px;align-items:center;justify-content:center;gap:4px;background:transparent;box-shadow:inset 0 0 0 1.5px var(--soft);color:var(--soft);font-size:12px;font-weight:600;min-height:150px;text-align:center}
+  .g.add b{font-size:26px;font-weight:400;color:var(--ink);line-height:1}
+  #cari{display:none}
+  .field{border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14px;background:#fff;width:100%;min-width:0}
+  .inline{display:flex;gap:8px}
+  .inline .field{flex:1}
+
+  /* ===== Pilihan ===== */
+  .tray{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center}
+  .tray em{font-style:normal;color:var(--soft);font-size:13px}
+  .tk{display:inline-flex;align-items:center;gap:6px;background:var(--mint);border-radius:999px;padding:6px 6px 6px 12px;font-size:13px;font-weight:600;max-width:100%}
+  .tk span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tk button{border:0;background:rgba(35,20,43,.12);width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:11px;flex:none}
+  .optlabel{font-size:13px;font-weight:700}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:13px;padding:7px 13px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);border:0;cursor:default}
+  button.chip{cursor:pointer;font-weight:600}
+  button.chip[aria-pressed=true]{background:var(--ink);color:#fff;box-shadow:none}
+  .chip.bad{box-shadow:inset 0 0 0 1.5px var(--rose);color:var(--rose)}
+  .chip.pick{box-shadow:inset 0 0 0 1.5px var(--mint-deep);color:var(--mint-deep);cursor:pointer;font-weight:700}
+  .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+  .switch small{display:block;color:var(--soft);font-size:12px;font-weight:400}
+  .switch input{appearance:none;-webkit-appearance:none;flex:none;width:48px;height:28px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;transition:background .15s}
+  .switch input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+  .switch input:checked{background:var(--mint-deep)}
+  .switch input:checked::after{transform:translateX(20px)}
+
+  /* ===== Butang ===== */
+  .btn{background:#fff;border:0;box-shadow:inset 0 0 0 1.5px var(--line);padding:11px 16px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;color:var(--ink)}
+  .btn.primary{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
+  .btn.buynow{background:var(--rose);color:#fff;box-shadow:none;font-weight:700}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .cta{display:flex;gap:8px}
+  .cta .btn{flex:1;padding:15px 14px;font-size:16px}
+  .bar{display:flex;gap:8px;flex-wrap:wrap}
+  #buyRow{display:none;flex-direction:column;gap:8px}
+  #buyRow a{display:flex;justify-content:space-between;gap:10px;align-items:center;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);border-radius:14px;padding:10px 12px;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600}
+  #buyRow a i{font-style:normal;background:var(--rose);color:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+  .history{display:flex;gap:8px;overflow-x:auto;padding:2px}
+  .history:empty{display:none}
+  .history img{height:96px;border-radius:12px;cursor:pointer;flex:none;box-shadow:inset 0 0 0 0 transparent;opacity:.75}
+  .history img.active{opacity:1;outline:3px solid var(--mint-deep);outline-offset:-3px}
+
+  /* ===== Stylist ===== */
+  .num{flex:1 1 130px;min-width:0}
+  .advice{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+  .card{border-radius:16px;padding:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .card h3{font-size:13px;font-weight:700;color:var(--soft);margin-bottom:6px}
+  .card p{font-size:14px}
+  .card .chips{margin-top:6px}
+  .colors{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .colors span{display:flex;align-items:center;gap:6px;font-size:13px}
+  .colors i{width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);display:inline-block}
+  .size{font-family:var(--display);font-size:46px;font-weight:600;line-height:1}
+  .size small{font-family:var(--body);font-size:13px;color:var(--soft);font-weight:500;margin-left:8px}
+
+  .ghost{position:fixed;width:84px;height:84px;pointer-events:none;z-index:50;opacity:.9;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3));display:none}
   .ghost img{width:100%;height:100%;object-fit:contain}
+  #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
+  #toast.show{opacity:1}
+
+  @media(max-width:899px){
+    .cta{position:fixed;left:0;right:0;bottom:0;z-index:7;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--paper);box-shadow:0 -8px 24px -12px rgba(35,20,43,.35)}
+    .drop{min-height:360px}
+  }
+  @media(min-width:900px){
+    main{display:grid;grid-template-columns:minmax(0,1fr) 420px;align-items:start;gap:22px;padding:22px 22px 40px}
+    .stagecol{position:sticky;top:76px}
+    .rail{flex-wrap:wrap;overflow:visible}
+    .g{width:calc(33.333% - 7px)} .g.add{width:calc(33.333% - 7px)}
+  }
+  @media(prefers-reduced-motion:reduce){.busy::before{animation:none;top:40%}.drop.glint::after{animation:none}*{transition:none!important}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Live <span>Try-On</span></h1>
-  <div class="key">
-    <input id="apiKey" type="password" placeholder="Gemini API key (disimpan dalam browser)">
-    <small id="keyStatus"></small>
-  </div>
+  <span class="wordmark">Live Try-On</span>
+  <button class="pill" id="btnSettings" type="button"></button>
 </header>
 
+<div id="settings">
+  <div class="in" id="keyMode">
+    <label for="apiKey">Gemini API key</label>
+    <input id="apiKey" type="password" autocomplete="off" placeholder="Tampal API key di sini">
+    <small>Key disimpan dalam browser kau sahaja. Dapatkan key di <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.</small>
+  </div>
+  <div class="in" id="codeMode" style="display:none">
+    <label for="kod">Kod kredit</label>
+    <input id="kod" type="text" autocomplete="off" autocapitalize="characters" placeholder="cth: TRY-8K2M">
+    <small>Gambar biasa 1 kredit, gambar HD 2 kredit. <span id="baki"></span> <a id="beliKredit" href="#" target="_blank" rel="noopener" style="display:none">Beli kredit</a></small>
+  </div>
+</div>
+
 <main>
-  <aside>
-    <h2>Pilih baju</h2>
-    <p>Seret baju ke atas gambar kau. Boleh tambah gambar baju sendiri (PNG/JPG, latar putih lagi bagus).</p>
-    <div class="garments" id="garments">
-      <label class="g add" for="garmentFile"><b>+</b>Tambah baju</label>
-    </div>
-    <input type="file" id="garmentFile" accept="image/*" multiple>
-  </aside>
-
-  <section>
-    <div class="stage">
-      <h2>Gambar kau</h2>
-      <p class="sub">Upload selfie badan penuh / separuh badan, cahaya terang. Lepas tu seret baju ke atasnya.</p>
+  <div class="stagecol">
+    <div class="mirror">
       <div class="drop empty" id="drop">
-        <div class="ph" id="ph"><b>📸</b>Klik atau seret gambar kau ke sini</div>
-        <img id="photo" style="display:none" alt="">
-        <span class="tag" id="tag" style="display:none"></span>
-        <div class="busy" id="busy"><div class="spinner"></div><span id="busyText">AI sedang pasangkan baju...</span></div>
+        <div class="ph" id="ph">
+          <svg viewBox="0 0 120 90" aria-hidden="true"><path d="M60 40v-5c0-5 4-7 8-9 5-2 9-5 9-10 0-5-4-9-9-9-5 0-9 3-9 9"/><path d="M60 40 14 70c-5 3-3 8 3 8h86c6 0 8-5 3-8Z"/></svg>
+          <h1>Cuba dulu, baru beli</h1>
+          <p>Upload gambar kau. Badan penuh atau separuh badan, cahaya terang, menghadap kamera.</p>
+          <span class="btn primary">Pilih gambar</span>
+        </div>
+        <button id="btnCmp" type="button" aria-pressed="false">Banding</button>
+        <div class="frame" id="frame">
+          <img id="photo" alt="Gambar kau" draggable="false">
+          <img id="orig" class="orig" alt="" draggable="false">
+          <div class="divider"></div>
+          <input type="range" id="cmp" min="0" max="100" value="50" aria-label="Banding sebelum dan selepas">
+          <span class="lbl" id="tag"></span><span class="lbl" id="tagR"></span>
+        </div>
+        <div class="busy" id="busy"><span id="busyText">AI sedang pasangkan outfit...</span></div>
       </div>
-      <input type="file" id="photoFile" accept="image/*">
+    </div>
+    <p class="privacy">Gambar kau dihantar ke Google Gemini untuk diproses dan tidak disimpan oleh apps ini.</p>
+    <input type="file" id="photoFile" accept="image/*">
+  </div>
+
+  <div class="side">
+    <div class="panel">
+      <div><h2>Almari</h2><p class="sub" id="asideHint">Tekan untuk pilih. Boleh gabung sampai 3 item dalam satu outfit.</p></div>
+      <input id="cari" class="field" type="search" placeholder="Cari baju...">
+      <div class="rail" id="garments">
+        <label class="g add" for="garmentFile"><b>+</b>Tambah gambar baju</label>
+      </div>
+      <input type="file" id="garmentFile" accept="image/*" multiple>
+      <div>
+        <label class="optlabel" for="idaman">Tak ada gambar? Taip baju idaman kau</label>
+        <div class="inline" style="margin-top:6px">
+          <input id="idaman" class="field" type="text" maxlength="80" placeholder="cth: baju kurung moden hijau sage">
+          <button class="btn" id="btnIdaman" type="button">Tambah</button>
+        </div>
+      </div>
     </div>
 
-    <div class="bar">
-      <button class="btn primary" id="btnGenerate" disabled>✨ Pakai baju</button>
-      <button class="btn" id="btnOriginal" disabled>Asal</button>
-      <button class="btn" id="btnDownload" disabled>⬇ Muat turun</button>
-      <button class="btn" id="btnNewPhoto">Tukar gambar</button>
-      <span id="status" style="font-size:12px;color:var(--muted)"></span>
+    <div class="panel">
+      <div><h2>Outfit kau</h2></div>
+      <div class="tray" id="tray"></div>
+      <div>
+        <span class="optlabel" id="lblLatar">Latar</span>
+        <div class="chips" id="scenes" role="group" aria-labelledby="lblLatar" style="margin-top:6px"></div>
+      </div>
+      <label class="switch" for="hd"><span><b>Kualiti HD</b><small id="hdNote">Guna model Nano Banana Pro. Lebih tajam, lebih lambat.</small></span><input type="checkbox" id="hd"></label>
+      <div class="cta">
+        <button class="btn primary" id="btnGenerate" type="button">Pilih gambar</button>
+        <a class="btn buynow" id="btnBuy" href="#" target="_blank" rel="noopener sponsored" style="display:none">Beli</a>
+      </div>
+      <div id="buyRow"></div>
+      <div class="bar">
+        <button class="btn" id="btnShare" type="button" disabled>Kongsi</button>
+        <button class="btn" id="btnDownload" type="button" disabled>Simpan</button>
+        <button class="btn" id="btnCollage" type="button" disabled>Kolaj story</button>
+        <button class="btn" id="btnNewPhoto" type="button">Tukar gambar</button>
+      </div>
+      <div class="history" id="history"></div>
     </div>
 
-    <div class="history" id="history"></div>
-
-    <!-- ===== CADANGAN AI ===== -->
-    <div class="stage" id="advisor">
-      <h2>Cadangan gaya & saiz</h2>
-      <p class="sub">AI tengok gambar kau dan cadangkan warna, gaya dan anggaran saiz. Isi tinggi/berat untuk saiz lebih tepat.</p>
-      <div class="bar" style="margin-bottom:10px">
-        <input class="num" id="tinggi" type="number" placeholder="Tinggi (cm)" min="120" max="230">
-        <input class="num" id="berat" type="number" placeholder="Berat (kg)" min="30" max="250">
-        <select id="jantina" class="num"><option value="">Jantina (pilihan)</option><option value="lelaki">Lelaki</option><option value="perempuan">Perempuan</option></select>
-        <button class="btn primary" id="btnAnalyse" disabled>🔍 Analisis gaya saya</button>
+    <div class="panel" id="advisor">
+      <div><h2>Stylist AI</h2><p class="sub">AI tengok gambar kau dan cadangkan warna, gaya dan anggaran saiz. Isi tinggi dan berat untuk saiz lebih tepat.</p></div>
+      <div class="bar">
+        <input class="field num" id="tinggi" type="number" inputmode="numeric" placeholder="Tinggi (cm)" min="120" max="230">
+        <input class="field num" id="berat" type="number" inputmode="numeric" placeholder="Berat (kg)" min="30" max="250">
+        <select id="jantina" class="field num"><option value="">Jantina (pilihan)</option><option value="lelaki">Lelaki</option><option value="perempuan">Perempuan</option></select>
       </div>
+      <button class="btn primary" id="btnAnalyse" type="button" disabled>Analisis gaya saya</button>
       <div id="adviceOut"></div>
     </div>
-  </section>
+  </div>
 </main>
 
 <div class="ghost" id="ghost"><img id="ghostImg" alt=""></div>
-<div id="toast"></div>
+<div id="toast" role="status"></div>
 
+<script src="katalog.js"></script>
 <script>
 // ================= CONFIG =================
-// Senarai model ikut keutamaan — kalau yang pertama "not found / no longer available", cuba seterusnya
-const IMAGE_MODELS = ['gemini-3.1-flash-lite-image', 'gemini-nano-banana-2.1', 'gemini-2.5-flash-image'];
-const TEXT_MODELS  = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+const CONFIG = {
+  // Kosong = mod ujian: pengguna masukkan Gemini API key sendiri.
+  // Isi dengan URL Cloudflare Worker (lihat worker.js) = mod kredit: pelanggan guna kod kredit, API key kau tersembunyi.
+  PROXY_URL: '',
+  BELI_KREDIT_URL: '',                 // pautan bayaran / WhatsApp untuk beli kod kredit
+  BRAND: 'Live Try-On',                // tera pada gambar dan kolaj yang dikongsi
+  SHARE_TEXT: 'Aku cuba outfit ni guna Live Try-On. Cuba kau pula:',
+  MAX_ITEM: 3                          // maksimum item dalam satu outfit
+};
+// Senarai model ikut keutamaan. Kalau yang pertama tak tersedia, cuba seterusnya.
+const IMAGE_MODELS = ['gemini-nano-banana-2.1', 'gemini-3.1-flash-lite-image', 'gemini-2.5-flash-image'];   // biasa
+const HD_MODELS    = ['gemini-3-pro-image', 'gemini-nano-banana-2.1'];                                       // Kualiti HD
+const TEXT_MODELS  = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
+const SCENES = [
+  { id:'asal',   nama:'Asal',   en:'' },
+  { id:'studio', nama:'Studio', en:'a clean professional fashion photo studio with a soft neutral backdrop' },
+  { id:'bandar', nama:'Bandar', en:'a stylish city street in soft daylight' },
+  { id:'kafe',   nama:'Kafe',   en:'a cozy modern cafe interior with warm light' },
+  { id:'pantai', nama:'Pantai', en:'a tropical beach at golden hour' },
+  { id:'majlis', nama:'Majlis', en:'an elegant festive event hall with warm decorative lights' }
+];
 
-// Panggil Gemini dengan auto-retry (server sibuk) + fallback model (model mati)
+const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function callGemini(models, body, onStatus = () => {}){
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(m, ms=3200){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); }
+function store(k, v){ try { if (v === undefined) return localStorage.getItem(k) || ''; localStorage.setItem(k, v); } catch (e) { return ''; } }
+
+// Panggil Gemini dengan auto-retry (server sibuk) + fallback model (model mati). kind: image | hd | text
+async function callGemini(models, body, onStatus = () => {}, kind = 'image'){
   let lastErr, stop = false;
   for (const m of models) {
     if (stop) break;
     for (let attempt = 1; attempt <= 3; attempt++) {
       let r, j;
       try {
-        r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`, {
-          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
-        });
+        const url = CONFIG.PROXY_URL
+          ? `${CONFIG.PROXY_URL}?model=${encodeURIComponent(m)}&kind=${kind}`
+          : `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent($('apiKey').value.trim())}`;
+        const headers = {'Content-Type':'application/json'};
+        if (CONFIG.PROXY_URL) headers['X-Kod'] = $('kod').value.trim().toUpperCase();
+        r = await fetch(url, { method:'POST', headers, body: JSON.stringify(body) });
         j = await r.json();
       } catch (e) { lastErr = new Error('Tiada sambungan internet / rangkaian terputus.'); await sleep(1500); continue; }
+      const left = r.headers.get('X-Baki');
+      if (left !== null) showBaki(left);
       if (r.ok) return j;
       const msg = j.error?.message || `HTTP ${r.status}`;
       lastErr = new Error(msg);
+      if (r.status === 402 || r.status === 401) { stop = true; break; }
 
       const busy = r.status === 503 || r.status === 500 || /high demand|overloaded|try again later|UNAVAILABLE|internal/i.test(msg);
       const gone = r.status === 404 || /not found|no longer available|not supported|deprecated/i.test(msg);
 
       if (busy && attempt < 3) { onStatus(`Server sibuk, cuba lagi (${attempt}/3)...`); await sleep(2000 * attempt); continue; }
-      if (busy || gone) { console.warn(`Model ${m}: ${msg} — cuba model seterusnya`); break; }   // ke model seterusnya
-      stop = true; break;              // error lain (quota/billing/key) — berhenti terus
+      if (busy || gone) { console.warn(`Model ${m}: ${msg}. Cuba model seterusnya`); break; }
+      stop = true; break;              // error lain (quota/billing/key): berhenti terus
     }
   }
-  // mesej mesra untuk error biasa
   const m = lastErr.message;
+  if (/kredit habis/i.test(m)) { openSettings(true); throw new Error('Kredit tak cukup. Beli kredit baru untuk teruskan.'); }
+  if (/kod tak sah/i.test(m)) { openSettings(true); throw new Error('Kod kredit tak sah. Semak semula kod kau.'); }
   if (/quota|billing|free tier|limit: 0/i.test(m)) throw new Error('Kuota habis / model ni perlukan billing. Tekan "Set up billing" dalam AI Studio untuk aktifkan.');
   if (/API key not valid|API_KEY_INVALID/i.test(m)) throw new Error('API key tak sah. Semak semula key dalam AI Studio.');
   if (/high demand|overloaded|try again later|UNAVAILABLE/i.test(m)) throw new Error('Server AI sibuk sekarang. Tunggu seminit dan cuba lagi.');
   throw lastErr;
 }
-const PROMPT = `You are a virtual try-on engine. Image 1 is a photo of a person. Image 2 is a garment product photo.
-Generate a photorealistic version of Image 1 where the SAME person is wearing the garment from Image 2.
-Keep the person's face, hair, skin tone, body shape, pose, hands, phone, background, lighting and camera angle EXACTLY the same.
-Only replace the clothing on the relevant body area with the garment, fitting it naturally to the body with realistic folds, drape and shadows.
-Keep the garment's color, pattern, logo and texture faithful to Image 2. Output only the edited image.`;
 
-// Baju contoh (SVG ringkas) — ganti dengan gambar produk sebenar + link affiliate nanti
+function buildPrompt(items, sceneId){
+  let n = 1;
+  const lines = items.map(g => g.text ? `- an item described as: "${g.name}"` : `- the item shown in Image ${++n}`);
+  const sc = SCENES.find(s => s.id === sceneId);
+  const bg = sc && sc.en
+    ? `Replace the background with ${sc.en}. Relight the person subtly so they belong in that scene, but keep their pose and framing.`
+    : `Keep the background, lighting and camera angle EXACTLY the same.`;
+  return `You are a virtual try-on engine. Image 1 is a photo of a person.${n > 1 ? ` Images 2 to ${n} are product photos of clothing or accessories.` : ''}
+Generate a photorealistic version of Image 1 where the SAME person is wearing all of the following together as one outfit:
+${lines.join('\n')}
+Keep the person's face, skin tone, body shape, pose and hands EXACTLY the same. Keep their hair the same unless an item covers it (such as a hijab or hat).
+Only replace the clothing on the relevant body areas, fitting each item naturally to the body with realistic folds, drape and shadows.
+Keep each product's color, pattern, logo and texture faithful to its photo. Clothing not being replaced stays as it is.
+${bg}
+Output only the edited image.`;
+}
+
+// Baju contoh (SVG ringkas). Ganti dengan gambar produk sebenar + link affiliate dalam katalog.js
 const SAMPLE_GARMENTS = [
   { name:'T-shirt biru', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 15 L45 10 Q50 20 55 10 L70 15 L85 30 L72 40 L72 90 L28 90 L28 40 L15 30 Z' fill='%232d5bff'/></svg>` },
   { name:'Hoodie kelabu', svg:`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M28 18 L42 8 Q50 22 58 8 L72 18 L88 34 L74 44 L74 92 L26 92 L26 44 L12 34 Z' fill='%23b8b8c2'/><circle cx='50' cy='14' r='9' fill='%239a9aa8'/><path d='M38 60 h24 v16 h-24z' fill='%23a3a3ae'/></svg>` },
@@ -191,79 +356,155 @@ const SAMPLE_GARMENTS = [
 ];
 
 // ================= STATE =================
-let photoB64 = null, photoMime = 'image/jpeg';
-let originalSrc = null;
-let selectedGarment = null;     // {name, dataUrl}
-let history = [];               // dataUrls
-const $ = id => document.getElementById(id);
+let originalSrc = null;         // gambar asal pengguna (dataURL)
+let current = null;             // hasil yang sedang dipapar, atau null = asal
+let sel = [];                   // item yang dipilih untuk outfit (maks CONFIG.MAX_ITEM)
+let scene = 'asal';
+let hist = [];                  // senarai hasil
+let working = false, gid = 0;
+const registry = [];              // semua item dalam almari
+const cache = new Map();        // kombinasi outfit -> hasil, supaya kombinasi sama tak dijana (dan dicaj) dua kali
 
-function toast(m, ms=3200){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),ms); }
+// ================= AKSES (API key atau kod kredit) =================
+const PROXY = !!CONFIG.PROXY_URL;
+$('keyMode').style.display = PROXY ? 'none' : 'flex';
+$('codeMode').style.display = PROXY ? 'flex' : 'none';
+$('apiKey').value = store('gemini_key');
+$('kod').value = store('tryon_kod');
+if (PROXY) $('hdNote').textContent = 'Guna model Nano Banana Pro. Lebih tajam, 2 kredit setiap gambar.';
+if (CONFIG.BELI_KREDIT_URL) { $('beliKredit').href = CONFIG.BELI_KREDIT_URL; $('beliKredit').style.display = 'inline'; }
+function canCall(){ return PROXY ? $('kod').value.trim().length >= 4 : $('apiKey').value.trim().length > 20; }
+function showBaki(n){ $('baki').textContent = `Baki: ${n} kredit.`; $('btnSettings').textContent = `Kredit: ${n}`; $('btnSettings').classList.remove('warn'); }
+function refreshAccess(){
+  const ok = canCall();
+  $('btnSettings').textContent = PROXY ? (ok ? 'Kod kredit ✓' : 'Masukkan kod kredit') : (ok ? 'API key ✓' : 'Masukkan API key');
+  $('btnSettings').classList.toggle('warn', !ok);
+}
+function openSettings(force){ const s = $('settings'); s.classList.toggle('show', force === true ? true : !s.classList.contains('show')); if (s.classList.contains('show')) (PROXY ? $('kod') : $('apiKey')).focus(); }
+$('btnSettings').addEventListener('click', () => openSettings());
+$('apiKey').addEventListener('input', () => { store('gemini_key', $('apiKey').value.trim()); refreshAccess(); });
+$('kod').addEventListener('input', () => { store('tryon_kod', $('kod').value.trim()); refreshAccess(); });
+refreshAccess();
 
-// ================= API KEY =================
-$('apiKey').value = localStorage.getItem('gemini_key') || '';
-function keyOK(){ const ok = $('apiKey').value.trim().length > 20; $('keyStatus').textContent = ok ? '✓' : ''; return ok; }
-$('apiKey').addEventListener('input', () => { localStorage.setItem('gemini_key', $('apiKey').value.trim()); keyOK(); updateButtons(); });
-keyOK();
-
-// ================= GARMENTS =================
+// ================= ALMARI =================
 function svgToDataUrl(svg){ return 'data:image/svg+xml;utf8,' + svg; }
 function addGarmentTile(g, removable=false){
+  g.id = ++gid;
   const d = document.createElement('div');
-  d.className = 'g'; d.title = g.name;
-  d.innerHTML = `<img src="${g.dataUrl}" alt="${g.name}">` + (removable ? `<span class="del">✕</span>` : '');
-  d.addEventListener('click', e => { if (e.target.classList.contains('del')) { d.remove(); if (selectedGarment===g) selectedGarment=null; updateButtons(); return; } selectGarment(g, d); });
-  // drag (pointer events — jalan untuk mouse & sentuh)
-  d.addEventListener('pointerdown', e => startDrag(e, g, d));
+  d.className = 'g'; d.title = g.name; d.tabIndex = 0; d.setAttribute('role', 'button');
+  d.dataset.q = (g.name + ' ' + (g.tag || '')).toLowerCase();
+  d.innerHTML = (g.text ? `<div class="txt">${esc(g.name)}</div>` : `<img src="${esc(g.src)}" alt="${esc(g.name)}" loading="lazy">`)
+    + (removable ? `<span class="del" title="Buang">✕</span>` : '')
+    + (g.harga || g.link ? `<div class="meta"><span class="nm">${esc(g.name)}</span><span class="row">${g.harga ? `<b>${esc(g.harga)}</b>` : '<span></span>'}${g.link ? `<a class="buy" href="${esc(g.link)}" target="_blank" rel="noopener sponsored">Beli</a>` : ''}</span></div>` : '');
+  const im = d.querySelector('img');
+  if (im) im.addEventListener('error', () => { console.warn(`Gambar tak jumpa: ${g.src}. Semak path dalam katalog.js`); removeGarment(g); });
+  d.addEventListener('click', e => {
+    if (e.target.classList.contains('buy')) { e.stopPropagation(); return; }
+    if (e.target.classList.contains('del')) return removeGarment(g);
+    if (g.skipClick && Date.now() - g.skipClick < 400) return;      // klik selepas seret
+    toggleGarment(g);
+  });
+  d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleGarment(g); } });
+  // seret hanya untuk tetikus; di telefon, tekan untuk pilih supaya senarai boleh di-scroll
+  if (!g.text) d.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.target.classList.contains('buy') || e.target.classList.contains('del')) return; startDrag(e, g); });
+  g.tile = d; registry.push(g);
   $('garments').insertBefore(d, $('garments').lastElementChild);
 }
-function selectGarment(g, tile){
-  selectedGarment = g;
-  document.querySelectorAll('.g').forEach(x=>x.classList.remove('active'));
-  if (tile) tile.classList.add('active');
+function removeGarment(g){ g.tile.remove(); sel = sel.filter(x => x !== g); syncSel(); refreshSearch(); }
+function toggleGarment(g){
+  const i = sel.indexOf(g);
+  if (i >= 0) sel.splice(i, 1);
+  else { if (sel.length >= CONFIG.MAX_ITEM) return toast(`Maksimum ${CONFIG.MAX_ITEM} item dalam satu outfit`); sel.push(g); }
+  syncSel();
+}
+function syncSel(){
+  document.querySelectorAll('.g').forEach(x => x.classList.remove('active'));
+  sel.forEach(g => g.tile.classList.add('active'));
+  const t = $('tray'); t.innerHTML = sel.length ? '' : '<em>Belum ada item dipilih. Pilih dari almari.</em>';
+  sel.forEach(g => {
+    const k = document.createElement('span'); k.className = 'tk';
+    k.innerHTML = `<span>${esc(g.name)}</span><button type="button" aria-label="Buang ${esc(g.name)}">✕</button>`;
+    k.querySelector('button').addEventListener('click', () => toggleGarment(g));
+    t.appendChild(k);
+  });
   updateButtons();
 }
-SAMPLE_GARMENTS.forEach(g => addGarmentTile({ name:g.name, dataUrl: svgToDataUrl(g.svg) }));
+function refreshSearch(){ $('cari').style.display = document.querySelectorAll('#garments .g:not(.add)').length > 8 ? 'block' : 'none'; }
+$('cari').addEventListener('input', () => {
+  const q = $('cari').value.trim().toLowerCase();
+  document.querySelectorAll('#garments .g:not(.add)').forEach(t => t.style.display = !q || t.dataset.q.includes(q) ? '' : 'none');
+});
+
+// Muat katalog dari katalog.js; kalau tiada, guna contoh SVG.
+function loadKatalog(){
+  const list = Array.isArray(window.KATALOG) ? window.KATALOG : [];
+  if (!list.length) SAMPLE_GARMENTS.forEach(g => { const u = svgToDataUrl(g.svg); addGarmentTile({ name:g.name, src:u, dataUrl:u }); });
+  else list.forEach(k => addGarmentTile({ name:k.nama, src:k.gambar, harga:k.harga || '', link:k.link || '', tag:k.tag || '' }));
+  refreshSearch();
+}
+loadKatalog();
+if (window.matchMedia('(pointer:fine)').matches) $('asideHint').textContent = 'Tekan untuk pilih, atau seret terus ke cermin. Boleh gabung sampai 3 item dalam satu outfit.';
 
 $('garmentFile').addEventListener('change', async e => {
   for (const f of e.target.files) {
-    const dataUrl = await fileToDataUrl(f, 1024);
-    addGarmentTile({ name:f.name, dataUrl }, true);
+    try { const dataUrl = await fileToDataUrl(f, 1024); const g = { name:f.name.replace(/\.[^.]+$/, ''), src:dataUrl, dataUrl }; addGarmentTile(g, true); if (sel.length < CONFIG.MAX_ITEM) sel.push(g); }
+    catch (err) { toast(`Tak dapat baca "${f.name}"`); }
   }
-  e.target.value = '';
+  e.target.value = ''; syncSel(); refreshSearch();
 });
-
-// ---- drag ghost ----
-let drag = null;
-function startDrag(e, g, tile){
-  e.preventDefault();
-  drag = { g, tile, moved:false };
-  $('ghostImg').src = g.dataUrl;
-  moveGhost(e.clientX, e.clientY);
-  $('ghost').style.display = 'block';
-  tile.setPointerCapture(e.pointerId);
+function addIdaman(){
+  const v = $('idaman').value.trim();
+  if (v.length < 3) return $('idaman').focus();
+  const g = { name:v, text:true }; addGarmentTile(g, true);
+  if (sel.length < CONFIG.MAX_ITEM) sel.push(g);
+  $('idaman').value = ''; syncSel(); refreshSearch();
+  g.tile.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
 }
-function moveGhost(x,y){ $('ghost').style.left = (x-40)+'px'; $('ghost').style.top = (y-40)+'px'; }
+$('btnIdaman').addEventListener('click', addIdaman);
+$('idaman').addEventListener('keydown', e => { if (e.key === 'Enter') addIdaman(); });
+
+async function garmentData(g){
+  if (!g.dataUrl) {
+    const r = await fetch(g.src); if (!r.ok) throw new Error(`Gambar baju tak jumpa: ${g.src}`);
+    const blob = await r.blob();
+    g.dataUrl = await fileToDataUrl(new File([blob], 'baju', { type: blob.type || 'image/jpeg' }), 1024);
+  }
+  return toPngDataUrl(g.dataUrl);
+}
+
+// ---- seret (tetikus) ----
+let drag = null;
+function startDrag(e, g){ e.preventDefault(); drag = { g, moved:false, x:e.clientX, y:e.clientY }; $('ghostImg').src = g.src; g.tile.setPointerCapture(e.pointerId); }
+function isOverDrop(x,y){ const r=$('drop').getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
 window.addEventListener('pointermove', e => {
-  if (!drag) return; drag.moved = true; moveGhost(e.clientX, e.clientY);
-  const over = isOverDrop(e.clientX, e.clientY);
-  $('drop').classList.toggle('over', over);
+  if (!drag) return;
+  if (!drag.moved && Math.hypot(e.clientX-drag.x, e.clientY-drag.y) < 8) return;
+  drag.moved = true; const gh = $('ghost'); gh.style.display = 'block'; gh.style.left = (e.clientX-42)+'px'; gh.style.top = (e.clientY-42)+'px';
+  $('drop').classList.toggle('over', isOverDrop(e.clientX, e.clientY));
 });
 window.addEventListener('pointerup', e => {
   if (!drag) return;
-  $('ghost').style.display = 'none';
-  $('drop').classList.remove('over');
-  const over = isOverDrop(e.clientX, e.clientY);
-  selectGarment(drag.g, drag.tile);
-  if (drag.moved && over) {
-    if (!photoB64) toast('Upload gambar kau dulu');
-    else generate();
+  $('ghost').style.display = 'none'; $('drop').classList.remove('over');
+  const d = drag; drag = null;
+  if (!d.moved) return;
+  d.g.skipClick = Date.now();
+  {
+    if (!sel.includes(d.g)) { if (sel.length >= CONFIG.MAX_ITEM) sel.shift(); sel.push(d.g); syncSel(); }
+    if (isOverDrop(e.clientX, e.clientY)) { if (!originalSrc) toast('Upload gambar kau dulu'); else generate(); }
   }
-  drag = null;
 });
-function isOverDrop(x,y){ const r=$('drop').getBoundingClientRect(); return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom; }
 
-// ================= PHOTO =================
-$('drop').addEventListener('click', () => { if (!photoB64) $('photoFile').click(); });
+// ================= PILIHAN =================
+SCENES.forEach(s => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = s.nama; b.setAttribute('aria-pressed', s.id === scene);
+  b.addEventListener('click', () => { scene = s.id; [...$('scenes').children].forEach(c => c.setAttribute('aria-pressed', c === b)); updateButtons(); });
+  $('scenes').appendChild(b);
+});
+$('hd').addEventListener('change', updateButtons);
+function comboKey(){ return sel.map(g => g.id).sort((a,b) => a-b).join('-') + '|' + scene + '|' + ($('hd').checked ? 'hd' : 'sd'); }
+
+// ================= GAMBAR =================
+$('drop').addEventListener('click', () => { if (!originalSrc) $('photoFile').click(); });
 $('btnNewPhoto').addEventListener('click', () => $('photoFile').click());
 $('photoFile').addEventListener('change', e => { const f=e.target.files[0]; if (f) loadPhoto(f); e.target.value=''; });
 $('drop').addEventListener('dragover', e => { e.preventDefault(); $('drop').classList.add('over'); });
@@ -271,37 +512,48 @@ $('drop').addEventListener('dragleave', () => $('drop').classList.remove('over')
 $('drop').addEventListener('drop', e => { e.preventDefault(); $('drop').classList.remove('over'); const f=e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) loadPhoto(f); });
 
 async function loadPhoto(file){
-  const dataUrl = await fileToDataUrl(file, 1280);
-  originalSrc = dataUrl;
-  setPhoto(dataUrl, 'Asal');
-  history = []; renderHistory();
-  $('drop').classList.remove('empty'); $('ph').style.display='none';
-  updateButtons();
+  let dataUrl;
+  try { dataUrl = await fileToDataUrl(file, 1280); } catch (e) { return toast('Tak dapat baca gambar tu. Cuba JPG atau PNG.'); }
+  originalSrc = dataUrl; $('orig').src = dataUrl;
+  hist = []; cache.clear();
+  $('drop').classList.remove('empty'); $('ph').style.display = 'none'; $('frame').style.display = 'inline-block';
+  showItem(null); glint();
 }
-function setPhoto(dataUrl, label){
-  $('photo').src = dataUrl; $('photo').style.display='block';
-  $('tag').textContent = label; $('tag').style.display='block';
-  const [meta, b64] = dataUrl.split(',');
-  photoB64 = b64; photoMime = meta.match(/data:(.*?);/)[1];
+function glint(){ const d = $('drop'); d.classList.remove('glint'); void d.offsetWidth; d.classList.add('glint'); }
+function setCompare(on){
+  $('frame').classList.toggle('cmp', on); $('btnCmp').setAttribute('aria-pressed', on);
+  $('tag').textContent = on ? 'Asal' : (current ? current.name : 'Asal');
+  if (on) { $('cmp').value = 50; $('frame').style.setProperty('--p', '50%'); }
 }
+function showItem(it){
+  current = it;
+  $('photo').src = it ? it.src : originalSrc;
+  $('tagR').textContent = it ? it.name : '';
+  $('btnCmp').style.display = it ? 'block' : 'none';
+  setCompare(false);
+  renderHistory(); showBuy(it); updateButtons();
+}
+$('btnCmp').addEventListener('click', e => { e.stopPropagation(); setCompare(!$('frame').classList.contains('cmp')); });
+$('cmp').addEventListener('input', () => $('frame').style.setProperty('--p', $('cmp').value + '%'));
+$('photo').addEventListener('contextmenu', e => e.preventDefault());
 
-// resize + compress ke JPEG supaya request kecil
+// resize + compress supaya request kecil
 function fileToDataUrl(file, maxSide){
   return new Promise((res, rej) => {
-    const img = new Image();
+    const img = new Image(), url = URL.createObjectURL(file);
     img.onload = () => {
       const s = Math.min(1, maxSide / Math.max(img.width, img.height));
       const c = document.createElement('canvas');
       c.width = Math.round(img.width*s); c.height = Math.round(img.height*s);
       const ctx = c.getContext('2d');
+      URL.revokeObjectURL(url);
       if (file.type === 'image/png') { ctx.drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/png')); }
       else { ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0,c.width,c.height); res(c.toDataURL('image/jpeg', 0.9)); }
     };
-    img.onerror = rej;
-    img.src = URL.createObjectURL(file);
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Gambar tak boleh dibaca')); };
+    img.src = url;
   });
 }
-
 // SVG → PNG supaya Gemini boleh baca
 function toPngDataUrl(dataUrl){
   return new Promise(res => {
@@ -311,72 +563,138 @@ function toPngDataUrl(dataUrl){
     img.src = dataUrl;
   });
 }
+const splitData = u => { const [meta, data] = u.split(','); return { mimeType: meta.match(/data:(.*?);/)[1], data }; };
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('Gagal sediakan gambar')); i.src = src; });
 
-// ================= GENERATE =================
+// ================= JANA =================
 async function generate(){
-  if (!keyOK()) return toast('Masukkan Gemini API key dulu (atas kanan)');
-  if (!photoB64) return toast('Upload gambar kau dulu');
-  if (!selectedGarment) return toast('Pilih baju dulu');
+  if (working) return;
+  if (!originalSrc) return $('photoFile').click();
+  if (!sel.length) return toast('Pilih sekurang-kurangnya satu item dari almari');
+  if (!canCall()) { openSettings(true); return toast(PROXY ? 'Masukkan kod kredit dulu' : 'Masukkan Gemini API key dulu'); }
+  const items = sel.slice(), key = comboKey(), isHd = $('hd').checked, sc = scene;
+  if (cache.has(key)) return showItem(cache.get(key));     // kombinasi ni dah pernah dijana: papar terus, tiada caj
 
-  $('busy').classList.add('show'); $('busyText').textContent = `Pasangkan "${selectedGarment.name}"...`;
-  $('btnGenerate').disabled = true;
+  working = true; updateButtons();
+  $('busy').classList.add('show'); $('busyText').textContent = `Memasang ${items.length > 1 ? items.length + ' item' : '"' + items[0].name + '"'}... boleh ambil masa beberapa saat`;
   try {
-    const gUrl = await toPngDataUrl(selectedGarment.dataUrl);
-    const [gMeta, gB64] = gUrl.split(','); const gMime = gMeta.match(/data:(.*?);/)[1];
-    // Guna gambar ASAL sebagai base supaya kualiti tak merosot bila tukar baju banyak kali
-    const [oMeta, oB64] = originalSrc.split(','); const oMime = oMeta.match(/data:(.*?);/)[1];
-
-    const body = {
-      contents: [{ parts: [
-        { text: PROMPT },
-        { inlineData: { mimeType: oMime, data: oB64 } },
-        { inlineData: { mimeType: gMime, data: gB64 } },
-      ]}],
-      generationConfig: { responseModalities: ['IMAGE'] }
-    };
-    const j = await callGemini(IMAGE_MODELS, body, s => $('busyText').textContent = s);
+    // Guna gambar ASAL sebagai base supaya kualiti tak merosot bila tukar outfit banyak kali
+    const parts = [{ text: buildPrompt(items, sc) }, { inlineData: splitData(originalSrc) }];
+    for (const g of items) if (!g.text) parts.push({ inlineData: splitData(await garmentData(g)) });
+    const body = { contents: [{ parts }], generationConfig: { responseModalities: ['IMAGE'] } };
+    const j = await callGemini(isHd ? HD_MODELS : IMAGE_MODELS, body, s => $('busyText').textContent = s, isHd ? 'hd' : 'image');
     const part = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    if (!part) throw new Error('AI tak pulangkan gambar. Cuba gambar lain / baju lain.');
-    const out = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-    setPhoto(out, selectedGarment.name);
-    history.unshift({ src: out, name: selectedGarment.name }); renderHistory(0);
-    toast('Siap ✓');
+    if (!part) throw new Error('AI tak pulangkan gambar. Cuba gambar lain atau item lain.');
+    const it = { src: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`, name: items.map(g => g.name).join(' + '), items, key };
+    cache.set(key, it); hist.unshift(it);
+    working = false; $('busy').classList.remove('show');
+    showItem(it); glint();
+    toast('Siap. Tekan "Banding" untuk tengok beza dengan asal');
   } catch (err) {
-    console.error(err); toast('Gagal: ' + err.message, 6000);
+    console.error(err); toast('Tak berjaya: ' + err.message, 6000);
   } finally {
-    $('busy').classList.remove('show'); updateButtons();
+    working = false; $('busy').classList.remove('show'); updateButtons();
   }
 }
 
-function renderHistory(activeIdx=-1){
+function renderHistory(){
   const h = $('history'); h.innerHTML = '';
-  history.forEach((it, i) => {
-    const im = document.createElement('img'); im.src = it.src; im.title = it.name;
-    if (i===activeIdx) im.classList.add('active');
-    im.addEventListener('click', () => { setPhoto(it.src, it.name); renderHistory(i); });
+  hist.forEach(it => {
+    const im = document.createElement('img'); im.src = it.src; im.title = it.name; im.alt = it.name;
+    if (it === current) im.classList.add('active');
+    im.addEventListener('click', () => showItem(it));
     h.appendChild(im);
   });
 }
-function updateButtons(){
-  const has = !!photoB64;
-  $('btnGenerate').disabled = !(has && selectedGarment && keyOK());
-  $('btnOriginal').disabled = !has; $('btnDownload').disabled = !has;
-  $('btnAnalyse').disabled = !(has && keyOK());
-  $('status').textContent = selectedGarment ? `Baju dipilih: ${selectedGarment.name}` : '';
+function showBuy(it){
+  const linked = it ? it.items.filter(g => g.link) : [];
+  const b = $('btnBuy'), row = $('buyRow');
+  if (linked.length === 1) { b.href = linked[0].link; b.textContent = linked[0].harga ? `Beli ${linked[0].harga}` : 'Beli baju ni'; b.style.display = 'block'; }
+  else b.style.display = 'none';
+  row.style.display = linked.length > 1 ? 'flex' : 'none';
+  row.innerHTML = linked.length > 1 ? linked.map(g => `<a href="${esc(g.link)}" target="_blank" rel="noopener sponsored"><span>${esc(g.name)}</span><i>Beli${g.harga ? ' ' + esc(g.harga) : ''}</i></a>`).join('') : '';
 }
-// ================= CADANGAN GAYA & SAIZ =================
-function garmentNames(){ return [...document.querySelectorAll('.garments .g:not(.add)')].map(d => d.title); }
+function updateButtons(){
+  const has = !!originalSrc, b = $('btnGenerate');
+  const worn = has && sel.length && current && current.key === comboKey();
+  b.disabled = working || (has && !sel.length);
+  b.textContent = !has ? 'Pilih gambar' : !sel.length ? 'Pilih item dari almari' : worn ? 'Sedang dipakai ✓' : sel.length > 1 ? `Pakai ${sel.length} item` : `Pakai ${sel[0].name}`;
+  $('btnDownload').disabled = !has; $('btnShare').disabled = !has; $('btnAnalyse').disabled = !has;
+  $('btnCollage').disabled = hist.length < 2;
+}
+$('btnGenerate').addEventListener('click', generate);
+
+// ================= KONGSI / SIMPAN / KOLAJ =================
+function siteLabel(){ return location.protocol.startsWith('http') ? location.host + location.pathname.replace(/(index|tryon)\.html$/, '').replace(/\/$/, '') : ''; }
+function toBlob(c){ return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('Gagal sediakan gambar')), 'image/jpeg', 0.92)); }
+function rr(x, X, Y, W, H, R){ x.beginPath(); x.moveTo(X+R, Y); x.arcTo(X+W, Y, X+W, Y+H, R); x.arcTo(X+W, Y+H, X, Y+H, R); x.arcTo(X, Y+H, X, Y, R); x.arcTo(X, Y, X+W, Y, R); x.closePath(); }
+function fit(x, text, max){ let t = text; while (t.length > 3 && x.measureText(t).width > max) t = t.slice(0, -2); return t === text ? t : t.trimEnd() + '…'; }
+
+async function brandedBlob(){
+  const img = await loadImg(current ? current.src : originalSrc);
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+  const bar = Math.max(40, Math.round(c.height * 0.055)), fs = Math.round(bar * 0.46);
+  const gr = x.createLinearGradient(0, c.height - bar * 1.8, 0, c.height);
+  gr.addColorStop(0, 'rgba(35,20,43,0)'); gr.addColorStop(1, 'rgba(35,20,43,.75)');
+  x.fillStyle = gr; x.fillRect(0, c.height - bar * 1.8, c.width, bar * 1.8);
+  x.fillStyle = '#fff'; x.textBaseline = 'middle';
+  x.font = `italic 700 ${fs}px "Bodoni Moda", serif`; x.fillText(CONFIG.BRAND, fs, c.height - bar / 2);
+  x.font = `500 ${Math.round(fs * 0.7)}px Figtree, sans-serif`; x.textAlign = 'right'; x.fillText(siteLabel(), c.width - fs, c.height - bar / 2);
+  return toBlob(c);
+}
+// Kolaj 9:16 untuk story / TikTok daripada 4 hasil terbaru
+async function collageBlob(){
+  const items = hist.slice(0, 4), W = 1080, H = 1920, pad = 36, top = 210, bottom = 130;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  const bg = x.createLinearGradient(0, 0, W, H); bg.addColorStop(0, '#3A1F47'); bg.addColorStop(1, '#23142B');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.fillStyle = '#fff'; x.textBaseline = 'middle';
+  x.font = 'italic 700 84px "Bodoni Moda", serif'; x.fillText(CONFIG.BRAND, pad, 96);
+  x.font = '500 34px Figtree, sans-serif'; x.fillStyle = '#BFEFDD'; x.fillText('Mana satu paling cun?', pad, 166);
+  const rows = items.length > 2 ? 2 : 1, cw = (W - pad * 3) / 2, ch = (H - top - bottom - pad * (rows - 1)) / rows;
+  for (let i = 0; i < items.length; i++) {
+    const img = await loadImg(items[i].src);
+    const X = pad + (i % 2) * (cw + pad), Y = top + Math.floor(i / 2) * (ch + pad);
+    const s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight), sw = cw / s, sh = ch / s;
+    x.save(); rr(x, X, Y, cw, ch, 36); x.clip();
+    x.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) * 0.15, sw, sh, X, Y, cw, ch);
+    const g = x.createLinearGradient(0, Y + ch - 150, 0, Y + ch); g.addColorStop(0, 'rgba(35,20,43,0)'); g.addColorStop(1, 'rgba(35,20,43,.85)');
+    x.fillStyle = g; x.fillRect(X, Y + ch - 150, cw, 150);
+    x.fillStyle = '#fff'; x.font = '700 40px Figtree, sans-serif'; x.fillText(String(i + 1), X + 26, Y + ch - 44);
+    x.font = '500 28px Figtree, sans-serif'; x.fillText(fit(x, items[i].name, cw - 110), X + 70, Y + ch - 44);
+    x.restore();
+  }
+  x.fillStyle = 'rgba(255,255,255,.8)'; x.font = '500 30px Figtree, sans-serif'; x.textAlign = 'center';
+  x.fillText(siteLabel() || 'Cuba outfit kau sendiri', W / 2, H - bottom / 2);
+  return toBlob(c);
+}
+function saveBlob(blob, name){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+async function shareBlob(blob, name){
+  const file = new File([blob], name, { type: 'image/jpeg' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], text: `${CONFIG.SHARE_TEXT} ${location.href.split(/[?#]/)[0]}` });
+  else { saveBlob(blob, name); toast('Gambar disimpan. Kongsi dari galeri kau.'); }
+}
+const guard = fn => async () => { try { await document.fonts.ready; await fn(); } catch (e) { if (e.name !== 'AbortError') toast('Tak berjaya: ' + e.message); } };
+$('btnDownload').addEventListener('click', guard(async () => saveBlob(await brandedBlob(), 'tryon.jpg')));
+$('btnShare').addEventListener('click', guard(async () => shareBlob(await brandedBlob(), 'tryon.jpg')));
+$('btnCollage').addEventListener('click', guard(async () => shareBlob(await collageBlob(), 'tryon-kolaj.jpg')));
+
+// ================= STYLIST AI =================
+function garmentNames(){ return [...document.querySelectorAll('#garments .g:not(.add)')].map(d => d.title); }
+function garmentInfo(){ return (window.KATALOG||[]).map(k => `${k.nama}${k.tag ? ' (' + k.tag + ')' : ''}`); }
 
 async function analyse(){
-  if (!keyOK()) return toast('Masukkan Gemini API key dulu');
   if (!originalSrc) return toast('Upload gambar kau dulu');
+  if (!canCall()) { openSettings(true); return toast(PROXY ? 'Masukkan kod kredit dulu' : 'Masukkan Gemini API key dulu'); }
   const tinggi = $('tinggi').value, berat = $('berat').value, jantina = $('jantina').value;
   const info = [tinggi && `tinggi ${tinggi} cm`, berat && `berat ${berat} kg`, jantina && `jantina ${jantina}`].filter(Boolean).join(', ') || 'tiada maklumat tambahan';
   const katalog = garmentNames();
 
   const prompt = `Kau seorang penasihat fesyen peribadi. Analisis foto orang ini (${info}).
-Jawab dalam Bahasa Malaysia santai, positif dan hormat — jangan sebut berat badan secara negatif.
-Katalog baju tersedia: ${JSON.stringify(katalog)}.
+Jawab dalam Bahasa Malaysia santai, positif dan hormat. Jangan sebut berat badan secara negatif.
+Katalog baju tersedia (nama + kata kunci): ${JSON.stringify(garmentInfo().length ? garmentInfo() : katalog)}.
 Pulangkan JSON sahaja dengan struktur:
 {
  "bentuk_badan": "nama bentuk badan + 1 ayat ringkas",
@@ -386,60 +704,65 @@ Pulangkan JSON sahaja dengan struktur:
  "gaya_cuba": ["..."],                               // 4-5 gaya/potongan spesifik, cth "kemeja oversized linen"
  "gaya_elak": ["..."],                               // 2-3
  "katalog_padan": ["..."],                           // nama dari katalog yang paling padan (0-3), guna nama TEPAT
+ "idea_outfit": ["..."],                             // 3 idea baju spesifik (jenis + warna + potongan) yang tiada dalam katalog, setiap satu bawah 8 patah perkataan
  "saiz": {"anggaran":"S/M/L/XL/XXL/3XL","julat":"cth M-L","nota":"1 ayat: asas anggaran & peringatan rujuk carta penjual"},
  "tip": "1-2 ayat tip styling paling berguna untuk orang ini"
 }
 Kalau tiada tinggi/berat, anggar saiz dari foto tapi nyatakan ia anggaran kasar.`;
 
-  $('btnAnalyse').disabled = true; $('adviceOut').innerHTML = `<p style="font-size:13px;color:var(--muted)">⏳ AI sedang analisis...</p>`;
+  const note = s => $('adviceOut').innerHTML = `<p class="sub">${esc(s)}</p>`;
+  $('btnAnalyse').disabled = true; note('AI sedang analisis...');
   try {
-    const [oMeta, oB64] = originalSrc.split(','); const oMime = oMeta.match(/data:(.*?);/)[1];
     const body = {
-      contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: oMime, data: oB64 } }] }],
+      contents: [{ parts: [{ text: prompt }, { inlineData: splitData(originalSrc) }] }],
       generationConfig: { responseMimeType: 'application/json', temperature: 0.6 }
     };
-    const j = await callGemini(TEXT_MODELS, body, s => $('adviceOut').innerHTML = `<p style="font-size:13px;color:var(--muted)">⏳ ${s}</p>`);
+    const j = await callGemini(TEXT_MODELS, body, note, 'text');
     const txt = j.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
-    const data = JSON.parse(txt.replace(/^```json|```$/g, '').trim());
+    let data;
+    try { data = JSON.parse(txt.replace(/^\s*```(?:json)?|```\s*$/g, '').trim()); }
+    catch (e) { throw new Error('Jawapan AI tak lengkap. Cuba sekali lagi.'); }
     renderAdvice(data);
   } catch (err) {
-    console.error(err); $('adviceOut').innerHTML = `<p style="font-size:13px;color:#a1183b">Gagal: ${err.message}</p>`;
+    console.error(err); $('adviceOut').innerHTML = `<p class="sub" style="color:var(--rose)">Tak berjaya: ${esc(err.message)}</p>`;
   } finally { $('btnAnalyse').disabled = false; }
 }
 
-function esc(s){ return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function renderAdvice(d){
   const chips = (arr, cls='') => (arr||[]).map(x => `<span class="chip ${cls}">${esc(x)}</span>`).join('');
   const names = garmentNames();
   const picks = (d.katalog_padan||[]).filter(n => names.includes(n));
+  const ideas = (d.idea_outfit||[]).slice(0, 3);
+  const hex = h => /^#[0-9a-f]{3,8}$/i.test(h || '') ? h : '#ccc';
   $('adviceOut').innerHTML = `
     <div class="advice">
       <div class="card"><h3>Anggaran saiz</h3>
         <div class="size">${esc(d.saiz?.anggaran||'-')}<small>${esc(d.saiz?.julat||'')}</small></div>
-        <p style="margin-top:6px;color:var(--muted)">${esc(d.saiz?.nota||'')}</p></div>
+        <p class="sub">${esc(d.saiz?.nota||'')}</p></div>
       <div class="card"><h3>Bentuk badan</h3><p>${esc(d.bentuk_badan)}</p></div>
-      <div class="card"><h3>Tona kulit</h3><p>${esc(d.tona_kulit)}</p>
-        <div class="colors">${(d.warna_sesuai||[]).map(c => `<span><i style="background:${esc(c.hex)}"></i>${esc(c.nama)}</span>`).join('')}</div>
-        ${d.warna_elak?.length ? `<div class="chips">${chips(d.warna_elak,'bad')}</div>` : ''}</div>
-      <div class="card"><h3>Gaya untuk cuba</h3><div class="chips">${chips(d.gaya_cuba)}</div>
-        ${d.gaya_elak?.length ? `<h3 style="margin-top:10px">Kurang sesuai</h3><div class="chips">${chips(d.gaya_elak,'bad')}</div>` : ''}</div>
+      <div class="card" style="grid-column:1/-1"><h3>Warna yang naik dengan kau</h3><p>${esc(d.tona_kulit)}</p>
+        <div class="colors">${(d.warna_sesuai||[]).map(c => `<span><i style="background:${hex(c.hex)}"></i>${esc(c.nama)}</span>`).join('')}</div>
+        ${d.warna_elak?.length ? `<h3 style="margin-top:12px">Kurang sesuai</h3><div class="chips">${chips(d.warna_elak,'bad')}</div>` : ''}</div>
+      <div class="card" style="grid-column:1/-1"><h3>Gaya untuk cuba</h3><div class="chips">${chips(d.gaya_cuba)}</div>
+        ${d.gaya_elak?.length ? `<h3 style="margin-top:12px">Kurang sesuai</h3><div class="chips">${chips(d.gaya_elak,'bad')}</div>` : ''}</div>
       <div class="card" style="grid-column:1/-1"><h3>Tip</h3><p>${esc(d.tip)}</p>
-        ${picks.length ? `<h3 style="margin-top:10px">Padan dari katalog — klik untuk pakai</h3><div class="chips" id="pickChips">${picks.map(n => `<span class="chip pick" data-name="${esc(n)}">👕 ${esc(n)}</span>`).join('')}</div>` : ''}
+        ${picks.length ? `<h3 style="margin-top:12px">Padan dari almari. Tekan untuk pakai</h3><div class="chips" id="pickChips">${picks.map(n => `<button type="button" class="chip pick" data-name="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : ''}
+        ${ideas.length ? `<h3 style="margin-top:12px">Idea AI. Tekan untuk cuba terus</h3><div class="chips" id="ideaChips">${ideas.map(n => `<button type="button" class="chip pick" data-name="${esc(n)}">${esc(n)}</button>`).join('')}</div>` : ''}
       </div>
     </div>`;
+  const wear = g => { sel = [g]; syncSel(); window.scrollTo({ top: 0, behavior: 'smooth' }); generate(); };
   document.querySelectorAll('#pickChips .chip').forEach(ch => ch.addEventListener('click', () => {
-    const tile = [...document.querySelectorAll('.garments .g')].find(t => t.title === ch.dataset.name);
-    if (!tile) return;
-    tile.click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    generate();
+    const tile = [...document.querySelectorAll('#garments .g')].find(t => t.title === ch.dataset.name);
+    const g = tile && allGarments().find(x => x.tile === tile);
+    if (g) wear(g);
+  }));
+  document.querySelectorAll('#ideaChips .chip').forEach(ch => ch.addEventListener('click', () => {
+    const g = { name: ch.dataset.name, text: true }; addGarmentTile(g, true); refreshSearch(); wear(g);
   }));
 }
+function allGarments(){ return registry.filter(g => g.tile.isConnected); }
 $('btnAnalyse').addEventListener('click', analyse);
-
-$('btnGenerate').addEventListener('click', generate);
-$('btnOriginal').addEventListener('click', () => { if (originalSrc) { setPhoto(originalSrc,'Asal'); renderHistory(-1); } });
-$('btnDownload').addEventListener('click', () => { const a=document.createElement('a'); a.href=$('photo').src; a.download='tryon.png'; a.click(); });
+syncSel();
 </script>
 </body>
 </html>
