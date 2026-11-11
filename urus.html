@@ -63,8 +63,8 @@
     <h2>Cara guna</h2>
     <ol>
       <li>Isi borang di bawah dan tekan "Tambah ke katalog". Ulang untuk setiap barang.</li>
-      <li>Tekan "Muat turun katalog.js" di bawah skrin.</li>
-      <li>Upload fail tu ke GitHub, ganti <code>katalog.js</code> yang lama. Gambar dah ada dalam fail tu, jadi tak perlu upload gambar berasingan.</li>
+      <li>Tekan "Terbitkan" di bawah skrin. Katalog terus masuk ke laman kau dalam 1 hingga 2 minit.</li>
+      <li>Kali pertama sahaja: sambung token GitHub di bahagian "Terbit terus ke laman".</li>
     </ol>
   </div>
 
@@ -99,6 +99,30 @@
     </div>
   </form>
 
+  <div class="panel" id="pubPanel">
+    <h2>Terbit terus ke laman</h2>
+    <p class="sub">Sambung sekali sahaja. Lepas tu butang "Terbitkan" hantar katalog terus ke laman kau, tanpa perlu upload ke GitHub.</p>
+    <div id="tokBox">
+      <label for="fTok">Token GitHub</label>
+      <input class="field" id="fTok" type="password" autocomplete="off" placeholder="github_pat_...">
+      <details style="margin-top:8px"><summary class="sub" style="cursor:pointer;font-weight:700;color:var(--ink)">Cara dapatkan token (sekali sahaja)</summary>
+        <ol style="margin-top:8px">
+          <li>Buka <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> dan login.</li>
+          <li>Token name: tulis apa-apa, cth "katalog". Expiration: pilih tempoh paling lama.</li>
+          <li>Repository access: pilih "Only select repositories", kemudian pilih <b id="repoName"></b>.</li>
+          <li>Permissions, Repository permissions, Contents: tukar kepada "Read and write".</li>
+          <li>Tekan "Generate token", salin token tu, dan tampal di kotak di atas.</li>
+        </ol>
+      </details>
+    </div>
+    <div class="two">
+      <div><label for="fOwner">Akaun GitHub</label><input class="field" id="fOwner" type="text" autocomplete="off"></div>
+      <div><label for="fRepo">Nama repo</label><input class="field" id="fRepo" type="text" autocomplete="off"></div>
+    </div>
+    <p class="sub" id="pubState"></p>
+    <p class="sub">Token disimpan dalam browser telefon ni sahaja, bukan dalam laman. Jangan kongsi token dengan sesiapa.</p>
+  </div>
+
   <div class="panel">
     <h2>Barang dalam katalog <span id="count" class="sub"></span></h2>
     <div class="list" id="list"></div>
@@ -108,8 +132,8 @@
 
 <div class="savebar"><div class="in">
   <div class="info"><b id="sbTitle">Tiada perubahan</b><span id="sbSize"></span></div>
-  <button class="btn" type="button" id="btnCopy">Salin</button>
-  <button class="btn rose" type="button" id="btnSave">Muat turun katalog.js</button>
+  <button class="btn" type="button" id="btnSave">Muat turun</button>
+  <button class="btn rose" type="button" id="btnPub">Terbitkan</button>
 </div></div>
 <div id="toast" role="status"></div>
 
@@ -118,7 +142,7 @@
 const MAKEUP = ['gincu','foundation','bedak','blusher','pembayang mata','celak','maskara','kening'];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000); }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),5000); }
 
 // Mula dengan katalog yang sedia ada di laman (kalau ada)
 let items = (Array.isArray(window.KATALOG) ? window.KATALOG : []).map(k => ({ nama:k.nama||'', kategori:(k.kategori||'baju').toLowerCase(), gambar:k.gambar||'', warna:k.warna||'', harga:k.harga||'', link:k.link||'', tag:k.tag||'' }));
@@ -187,7 +211,7 @@ function render(){
   $('empty').style.display = items.length ? 'none' : 'block';
   $('count').textContent = items.length ? `(${items.length})` : '';
   const mb = new Blob([output()]).size / 1048576, noLink = items.filter(it => !it.link).length;
-  $('sbTitle').textContent = dirty ? 'Ada perubahan belum dimuat turun' : 'Tiada perubahan';
+  $('sbTitle').textContent = dirty ? 'Ada perubahan belum diterbitkan' : 'Tiada perubahan';
   $('sbSize').innerHTML = `${items.length} barang, ${mb.toFixed(1)} MB${noLink ? `, ${noLink} tiada link` : ''}${mb > 8 ? ' <span class="warn">Fail besar: apps mungkin lambat dibuka.</span>' : ''}`;
 }
 $('list').addEventListener('click', e => {
@@ -201,11 +225,44 @@ $('list').addEventListener('click', e => {
 $('btnSave').addEventListener('click', () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([output()], { type:'text/javascript' })); a.download = 'katalog.js'; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  dirty = false; render(); toast('katalog.js dimuat turun. Upload ke GitHub untuk ganti yang lama.');
+  dirty = false; render(); toast('katalog.js dimuat turun.');
 });
-$('btnCopy').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(output()); toast('Kod katalog disalin'); } catch (e) { toast('Tak dapat salin. Guna butang Muat turun.'); }
-});
+// ---- Terbit terus ke GitHub (guna token yang disimpan dalam browser ini sahaja) ----
+function ls(k, v){ try { if (v === undefined) return localStorage.getItem(k) || ''; localStorage.setItem(k, v); } catch (e) { return ''; } }
+const guess = (() => { const m = location.hostname.match(/^(.+)\.github\.io$/); return { owner: m ? m[1] : '', repo: m ? (location.pathname.split('/')[1] || '') : '' }; })();
+$('fOwner').value = ls('kat_owner') || guess.owner; $('fRepo').value = ls('kat_repo') || guess.repo; $('fTok').value = ls('kat_token');
+function syncPub(){
+  $('repoName').textContent = $('fRepo').value.trim() || 'repo laman kau';
+  $('pubState').textContent = $('fTok').value.trim() ? 'Token disimpan. Tekan "Terbitkan" di bawah untuk hantar katalog.' : 'Belum bersambung.';
+}
+['fOwner','fRepo','fTok'].forEach(id => $(id).addEventListener('input', () => { ls('kat_owner', $('fOwner').value.trim()); ls('kat_repo', $('fRepo').value.trim()); ls('kat_token', $('fTok').value.trim()); syncPub(); }));
+const b64 = text => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(new Blob([text])); });
+async function publish(){
+  const tok = $('fTok').value.trim(), owner = $('fOwner').value.trim(), repo = $('fRepo').value.trim();
+  if (!tok || !owner || !repo) { $('pubPanel').scrollIntoView({ behavior:'smooth' }); return toast('Sambung token GitHub dulu (sekali sahaja)'); }
+  const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/katalog.js`;
+  const headers = { Authorization: 'Bearer ' + tok, Accept: 'application/vnd.github+json' };
+  const b = $('btnPub'); b.disabled = true; b.textContent = 'Menghantar...';
+  try {
+    let sha;
+    const g = await fetch(api, { headers, cache: 'no-store' });
+    if (g.ok) sha = (await g.json()).sha;
+    else if (g.status === 401) throw new Error('Token tak sah atau dah tamat tempoh. Buat token baru.');
+    else if (g.status !== 404) throw new Error(`GitHub menolak (${g.status}). Semak nama akaun dan repo.`);
+    const r = await fetch(api, { method: 'PUT', headers, body: JSON.stringify({ message: 'Kemas kini katalog', content: await b64(output()), sha }) });
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Token tak sah atau dah tamat tempoh. Buat token baru.');
+      if (r.status === 403 || r.status === 404) throw new Error('Token tak ada kebenaran untuk repo ni. Semak langkah 3 dan 4: pilih repo yang betul dan Contents "Read and write".');
+      if (r.status === 409) throw new Error('Katalog di laman baru sahaja berubah. Tekan Terbitkan sekali lagi.');
+      throw new Error(`GitHub menolak (${r.status}). Cuba lagi sebentar.`);
+    }
+    dirty = false; render(); toast('Diterbitkan. Laman dikemas kini dalam 1 hingga 2 minit.');
+  } catch (e) {
+    toast(e instanceof TypeError ? 'Tiada sambungan internet. Cuba lagi.' : e.message);
+  } finally { b.disabled = false; b.textContent = 'Terbitkan'; }
+}
+$('btnPub').addEventListener('click', publish);
+syncPub();
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
 syncWarna(); render();
 </script>
