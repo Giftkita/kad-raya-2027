@@ -188,6 +188,27 @@
   .sheetbox .row2{display:flex;gap:8px}
   .sheetbox .row2 .btn{flex:1;padding:14px 10px;font-size:15px}
   @media(min-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}.sheet{align-items:center}.sheetbox{border-radius:26px}}
+  /* ===== Urus katalog (pemilik) ===== */
+  body[data-view=admin] #viewAdmin{display:flex;max-width:760px}
+  .adm label{font-size:13px;font-weight:700;display:block;margin-bottom:5px}
+  .a-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .a-pick{display:flex;gap:12px;align-items:center}
+  .a-prev{flex:none;width:84px;height:84px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;overflow:hidden;font-size:11px;color:var(--soft);text-align:center}
+  .a-prev img{width:100%;height:100%;object-fit:contain}
+  .adm input[type=color]{width:54px;height:44px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:3px;cursor:pointer}
+  .a-list{display:flex;flex-direction:column;gap:8px}
+  .a-it{display:flex;gap:10px;align-items:center;background:#fff;border-radius:16px;padding:8px;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .a-it .th{flex:none;width:56px;height:56px;border-radius:10px;overflow:hidden;background:#fff}
+  .a-it .th img{width:100%;height:100%;object-fit:contain}
+  .a-it .tx{flex:1;min-width:0}
+  .a-it .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .a-it .mt{font-size:12px;color:var(--soft)}
+  .a-ok{color:var(--mint-deep);font-weight:700} .a-no{color:var(--rose);font-weight:700}
+  .a-it button{flex:none;border:0;background:var(--porcelain);border-radius:999px;padding:8px 11px;font-size:12px;font-weight:700;cursor:pointer}
+  .a-ol{padding-left:20px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+  .a-ol a{color:var(--mint-deep);font-weight:600;overflow-wrap:anywhere}
+  .a-pub{position:sticky;bottom:calc(66px + env(safe-area-inset-bottom));z-index:6;box-shadow:0 8px 28px -10px rgba(35,20,43,.5)}
+  @media(max-width:480px){.a-two{grid-template-columns:1fr}}
   .ghost{position:fixed;width:84px;height:84px;pointer-events:none;z-index:50;opacity:.9;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3));display:none}
   .ghost img{width:100%;height:100%;object-fit:contain}
   #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
@@ -259,7 +280,78 @@
     <p class="sub" id="infoAkses"></p>
     <button class="btn primary" type="button" id="btnAkses">Urus akses</button>
   </div>
+  <div class="panel">
+    <h2>Pemilik kedai</h2>
+    <p class="sub">Tambah barang, gambar dan link affiliate. Perubahan hanya boleh diterbitkan oleh pemilik yang ada token.</p>
+    <button class="btn" type="button" data-go="admin">Urus katalog</button>
+  </div>
   <p class="privacy">Apps ini tidak menjual barang secara langsung. Pautan Beli ialah pautan affiliate: kami mungkin terima komisen tanpa kos tambahan pada kau.</p>
+</section>
+
+<section class="page adm" id="viewAdmin">
+  <form class="panel" id="aForm" autocomplete="off" novalidate>
+    <h2 id="aTitle">Tambah barang</h2>
+    <div class="a-pick">
+      <div class="a-prev" id="aPrev">Tiada gambar</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <label for="aGambar" class="btn" style="margin:0">Pilih gambar barang</label>
+        <input type="file" id="aGambar" accept="image/*">
+        <span class="sub">Barang sahaja, latar putih lagi bagus. Makeup boleh guna warna shade sahaja.</span>
+      </div>
+    </div>
+    <div><label for="aNama">Nama barang</label><input class="field" id="aNama" type="text" maxlength="80" placeholder="cth: Baju Kurung Moden Sage"></div>
+    <div class="a-two">
+      <div><label for="aKat">Kategori</label>
+        <select class="field" id="aKat">
+          <optgroup label="Fesyen"><option>baju</option><option>seluar</option><option>tudung</option><option>beg</option><option>kasut</option><option>aksesori</option></optgroup>
+          <optgroup label="Makeup"><option>gincu</option><option>foundation</option><option>bedak</option><option>blusher</option><option>pembayang mata</option><option>celak</option><option>maskara</option><option>kening</option></optgroup>
+        </select></div>
+      <div><label for="aHarga">Harga</label><input class="field" id="aHarga" type="text" maxlength="20" placeholder="cth: RM89"></div>
+    </div>
+    <div><label for="aLink">Link affiliate</label><input class="field" id="aLink" type="text" inputmode="url" placeholder="Tampal link Shopee / TikTok Shop di sini">
+      <span class="sub">Link yang pelanggan buka bila tekan Beli.</span></div>
+    <div id="aWarnaBox" style="display:none"><label for="aWarna">Warna shade (makeup)</label>
+      <div class="bar" style="align-items:center"><input type="color" id="aWarna" value="#b5607a"><span class="sub">Pilih warna yang paling hampir dengan shade sebenar.</span></div></div>
+    <div><label for="aTag">Kata kunci</label><input class="field" id="aTag" type="text" maxlength="120" placeholder="cth: baju kurung, raya, hijau"></div>
+    <div class="bar">
+      <button class="btn primary" type="submit" id="aAdd" style="flex:1">Tambah ke katalog</button>
+      <button class="btn" type="button" id="aCancel" style="display:none">Batal</button>
+    </div>
+  </form>
+
+  <div class="panel a-pub">
+    <div><b id="aState">Tiada perubahan</b><p class="sub" id="aSize"></p></div>
+    <div class="bar">
+      <button class="btn buynow" type="button" id="aPub" style="flex:1">Terbitkan ke laman</button>
+      <button class="btn" type="button" id="aSave">Muat turun</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Barang dalam katalog <span id="aCount" class="sub"></span></h2>
+    <div class="a-list" id="aList"></div>
+    <p class="sub" id="aEmpty">Belum ada barang. Tambah yang pertama guna borang di atas.</p>
+  </div>
+
+  <div class="panel" id="aPubPanel">
+    <h2>Sambungan GitHub</h2>
+    <p class="sub">Buat sekali sahaja. Lepas tu butang "Terbitkan ke laman" hantar katalog terus, tanpa upload fail.</p>
+    <div><label for="aTok">Token GitHub</label><input class="field" id="aTok" type="password" autocomplete="off" placeholder="github_pat_..."></div>
+    <details><summary class="sub" style="cursor:pointer;font-weight:700;color:var(--ink)">Cara dapatkan token</summary>
+      <ol class="a-ol" style="margin-top:8px">
+        <li>Buka <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> dan login.</li>
+        <li>Token name: tulis apa-apa, cth "katalog". Expiration: pilih tempoh paling lama.</li>
+        <li>Repository access: pilih "Only select repositories", kemudian pilih <b id="aRepoName"></b>.</li>
+        <li>Permissions, Repository permissions, Contents: tukar kepada "Read and write".</li>
+        <li>Tekan "Generate token", salin token, dan tampal di kotak di atas.</li>
+      </ol>
+    </details>
+    <div class="a-two">
+      <div><label for="aOwner">Akaun GitHub</label><input class="field" id="aOwner" type="text" autocomplete="off"></div>
+      <div><label for="aRepo">Nama repo</label><input class="field" id="aRepo" type="text" autocomplete="off"></div>
+    </div>
+    <p class="sub">Token disimpan dalam browser telefon ni sahaja, bukan dalam laman. Jangan kongsi dengan sesiapa.</p>
+  </div>
 </section>
 
 <div id="viewTry">
@@ -1091,8 +1183,123 @@ $('shTry').addEventListener('click', () => sheetG && tryItem(sheetG));
 $('shSave').addEventListener('click', () => sheetG && toggleSave(sheetG));
 $('btnAkses').addEventListener('click', () => { openSettings(true); window.scrollTo(0, 0); });
 
+// ================= URUS KATALOG (pemilik kedai) =================
+(() => {
+  const MK = ['gincu','foundation','bedak','blusher','pembayang mata','celak','maskara','kening'];
+  let items = (Array.isArray(window.KATALOG) ? window.KATALOG : []).map(k => ({ nama:k.nama||'', kategori:(k.kategori||'baju').toLowerCase(), gambar:k.gambar||'', warna:k.warna||'', harga:k.harga||'', link:k.link||'', tag:k.tag||'' }));
+  let editing = -1, img = '', dirty = false;
+  const shrink = file => new Promise((res, rej) => {
+    const im = new Image(), url = URL.createObjectURL(file);
+    im.onload = () => {
+      const s = Math.min(1, 800 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas'); c.width = Math.round(im.width*s); c.height = Math.round(im.height*s);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(); };
+    im.src = url;
+  });
+  const showPrev = () => { $('aPrev').innerHTML = img ? `<img src="${esc(img)}" alt="">` : 'Tiada gambar'; };
+  const syncWarna = () => { $('aWarnaBox').style.display = MK.includes($('aKat').value) ? 'block' : 'none'; };
+  $('aGambar').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    try { img = await shrink(f); showPrev(); } catch (err) { toast('Tak dapat baca gambar tu. Cuba JPG atau PNG.'); }
+  });
+  $('aKat').addEventListener('change', syncWarna);
+  function resetForm(){
+    editing = -1; img = ''; $('aForm').reset(); showPrev(); syncWarna();
+    $('aTitle').textContent = 'Tambah barang'; $('aAdd').textContent = 'Tambah ke katalog'; $('aCancel').style.display = 'none';
+  }
+  $('aCancel').addEventListener('click', resetForm);
+  $('aForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const kat = $('aKat').value, isMk = MK.includes(kat), nama = $('aNama').value.trim();
+    if (!nama) { toast('Isi nama barang dulu'); return $('aNama').focus(); }
+    if (!img && !isMk) return toast('Pilih gambar barang dulu');
+    let link = $('aLink').value.trim();
+    if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+    const it = { nama, kategori:kat, gambar:img, warna:isMk ? $('aWarna').value : '', harga:$('aHarga').value.trim(), link, tag:$('aTag').value.trim() };
+    if (editing >= 0) { items[editing] = it; toast('Barang dikemas kini. Terbitkan untuk lihat di Kedai.'); }
+    else {
+      items.push(it);
+      // papar terus dalam Kedai untuk sesi ini; pelanggan nampak selepas diterbitkan
+      addGarmentTile({ name:it.nama, src:it.gambar, dataUrl:it.gambar || undefined, harga:it.harga, link:it.link, tag:it.tag, kategori:it.kategori, warna:it.warna });
+      refreshSearch(); toast('Barang ditambah. Tekan "Terbitkan ke laman" bila siap.');
+    }
+    dirty = true; resetForm(); render();
+  });
+  const output = () => '// KATALOG untuk Live Try-On. Dijana oleh Urus katalog dalam apps: edit di sana, bukan di sini.\nwindow.KATALOG = ' + JSON.stringify(items, null, 1) + ';\n';
+  function render(){
+    $('aList').innerHTML = items.map((it, i) => `
+      <div class="a-it">
+        <div class="th" ${!it.gambar && it.warna ? `style="background:${hexOk(it.warna)}"` : ''}>${it.gambar ? `<img src="${esc(it.gambar)}" alt="" loading="lazy">` : ''}</div>
+        <div class="tx"><div class="nm">${esc(it.nama)}</div>
+          <div class="mt">${esc(it.kategori)}${it.harga ? ', ' + esc(it.harga) : ''}, <span class="${it.link ? 'a-ok' : 'a-no'}">${it.link ? 'link ada' : 'tiada link'}</span></div></div>
+        <button type="button" data-edit="${i}">Edit</button><button type="button" data-del="${i}">Buang</button>
+      </div>`).join('');
+    $('aEmpty').style.display = items.length ? 'none' : 'block';
+    $('aCount').textContent = items.length ? `(${items.length})` : '';
+    const mb = new Blob([output()]).size / 1048576, noLink = items.filter(it => !it.link).length;
+    $('aState').textContent = dirty ? 'Ada perubahan belum diterbitkan' : 'Tiada perubahan';
+    $('aSize').textContent = `${items.length} barang, ${mb.toFixed(1)} MB${noLink ? `, ${noLink} tiada link` : ''}${mb > 8 ? '. Fail besar: apps mungkin lambat dibuka.' : ''}`;
+  }
+  $('aList').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.edit !== undefined) {
+      const i = +b.dataset.edit, it = items[i]; editing = i; img = it.gambar;
+      $('aNama').value = it.nama; $('aHarga').value = it.harga; $('aLink').value = it.link; $('aTag').value = it.tag;
+      if (![...$('aKat').options].some(o => o.value === it.kategori)) $('aKat').add(new Option(it.kategori, it.kategori));
+      $('aKat').value = it.kategori; if (it.warna) $('aWarna').value = hexOk(it.warna);
+      showPrev(); syncWarna();
+      $('aTitle').textContent = 'Edit barang'; $('aAdd').textContent = 'Simpan perubahan'; $('aCancel').style.display = 'block';
+      return window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (b.dataset.del !== undefined) {
+      if (b.dataset.sure) { items.splice(+b.dataset.del, 1); dirty = true; if (editing >= 0) resetForm(); render(); }
+      else { b.dataset.sure = '1'; b.textContent = 'Pasti?'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = 'Buang'; } }, 2500); }
+    }
+  });
+  $('aSave').addEventListener('click', () => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([output()], { type:'text/javascript' })); a.download = 'katalog.js'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('katalog.js dimuat turun.');
+  });
+  // ---- terbit terus ke GitHub ----
+  const m = location.hostname.match(/^(.+)\.github\.io$/);
+  $('aOwner').value = store('kat_owner') || (m ? m[1] : ''); $('aRepo').value = store('kat_repo') || (m ? (location.pathname.split('/')[1] || '') : ''); $('aTok').value = store('kat_token');
+  const syncPub = () => { $('aRepoName').textContent = $('aRepo').value.trim() || 'repo laman kau'; };
+  ['aOwner','aRepo','aTok'].forEach(id => $(id).addEventListener('input', () => { store('kat_owner', $('aOwner').value.trim()); store('kat_repo', $('aRepo').value.trim()); store('kat_token', $('aTok').value.trim()); syncPub(); }));
+  const b64 = text => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = rej; fr.readAsDataURL(new Blob([text])); });
+  async function publish(){
+    const tok = $('aTok').value.trim(), owner = $('aOwner').value.trim(), repo = $('aRepo').value.trim();
+    if (!tok || !owner || !repo) { $('aPubPanel').scrollIntoView({ behavior:'smooth' }); $('aPubPanel').querySelector('details').open = true; return toast('Sambung token GitHub dulu (sekali sahaja)', 5000); }
+    const api = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/katalog.js`;
+    const headers = { Authorization: 'Bearer ' + tok, Accept: 'application/vnd.github+json' };
+    const b = $('aPub'); b.disabled = true; b.textContent = 'Menghantar...';
+    try {
+      let sha;
+      const g = await fetch(api, { headers, cache: 'no-store' });
+      if (g.ok) sha = (await g.json()).sha;
+      else if (g.status === 401) throw new Error('Token tak sah atau dah tamat tempoh. Buat token baru.');
+      else if (g.status !== 404) throw new Error(`GitHub menolak (${g.status}). Semak nama akaun dan repo.`);
+      const r = await fetch(api, { method: 'PUT', headers, body: JSON.stringify({ message: 'Kemas kini katalog', content: await b64(output()), sha }) });
+      if (!r.ok) {
+        if (r.status === 401) throw new Error('Token tak sah atau dah tamat tempoh. Buat token baru.');
+        if (r.status === 403 || r.status === 404) throw new Error('Token tak ada kebenaran untuk repo ni. Pilih repo yang betul dan tukar Contents kepada "Read and write".');
+        if (r.status === 409) throw new Error('Katalog di laman baru sahaja berubah. Tekan Terbitkan sekali lagi.');
+        throw new Error(`GitHub menolak (${r.status}). Cuba lagi sebentar.`);
+      }
+      dirty = false; render(); toast('Diterbitkan. Pelanggan nampak dalam 1 hingga 2 minit.', 6000);
+    } catch (e) {
+      toast(e instanceof TypeError ? 'Tiada sambungan internet. Cuba lagi.' : e.message, 7000);
+    } finally { b.disabled = false; b.textContent = 'Terbitkan ke laman'; }
+  }
+  $('aPub').addEventListener('click', publish);
+  window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+  syncWarna(); syncPub(); render();
+})();
+
 setMode('fesyen');
-go('shop');
+go(location.hash === '#urus' ? 'admin' : 'shop');
 </script>
 </body>
 </html>
