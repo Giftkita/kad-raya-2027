@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Urus Katalog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,600;1,6..96,700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Halaman kerja untuk pemilik kedai: borang di atas, senarai barang di bawah, bar simpan melekat di kaki. Token sama dengan apps utama. */
+  :root{--porcelain:#EFEDF3;--paper:#FBFAFD;--ink:#23142B;--plum:#3A1F47;--soft:#6E6277;--line:#DDD8E4;--rose:#E8305A;--mint:#BFEFDD;--mint-deep:#1E7A5C;
+    --display:"Bodoni Moda","Didot","Times New Roman",serif;--body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--porcelain);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  button,input,select{font:inherit;color:inherit}
+  :focus-visible{outline:3px solid var(--rose);outline-offset:2px}
+  header{background:var(--ink);color:var(--paper);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  header b{font-family:var(--display);font-style:italic;font-size:22px}
+  header a{color:var(--mint);font-size:13px;font-weight:600}
+  main{max-width:760px;margin:0 auto;padding:16px 14px 130px;display:flex;flex-direction:column;gap:16px}
+  .panel{background:var(--paper);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+  h2{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.1}
+  .sub{font-size:13px;color:var(--soft)}
+  label{font-size:13px;font-weight:700;display:block;margin-bottom:5px}
+  .field{border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:15px;background:#fff;width:100%;min-width:0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{background:#fff;border:0;box-shadow:inset 0 0 0 1.5px var(--line);padding:12px 16px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;text-align:center}
+  .btn.primary{background:var(--ink);color:#fff;box-shadow:none;font-weight:700}
+  .btn.rose{background:var(--rose);color:#fff;box-shadow:none;font-weight:700}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .pick{display:flex;gap:12px;align-items:center}
+  .prev{flex:none;width:84px;height:84px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;overflow:hidden;font-size:11px;color:var(--soft);text-align:center}
+  .prev img{width:100%;height:100%;object-fit:contain}
+  input[type=file]{display:none}
+  input[type=color]{width:54px;height:44px;border:1.5px solid var(--line);border-radius:12px;background:#fff;padding:3px;cursor:pointer}
+  .list{display:flex;flex-direction:column;gap:8px}
+  .it{display:flex;gap:12px;align-items:center;background:#fff;border-radius:16px;padding:8px;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .it .th{flex:none;width:58px;height:58px;border-radius:10px;overflow:hidden;background:#fff;display:grid;place-items:center}
+  .it .th img{width:100%;height:100%;object-fit:contain}
+  .it .tx{flex:1;min-width:0}
+  .it .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .it .mt{font-size:12px;color:var(--soft)}
+  .tagok{color:var(--mint-deep);font-weight:700} .tagno{color:var(--rose);font-weight:700}
+  .it button{flex:none;border:0;background:var(--porcelain);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .savebar{position:fixed;left:0;right:0;bottom:0;background:var(--paper);box-shadow:0 -8px 24px -12px rgba(35,20,43,.35);padding:12px 14px calc(12px + env(safe-area-inset-bottom))}
+  .savebar .in{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .savebar .info{flex:1;font-size:12px;color:var(--soft);min-width:0}
+  .savebar .info b{display:block;color:var(--ink);font-size:14px}
+  .warn{color:var(--rose);font-weight:600}
+  ol{padding-left:20px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+  #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90vw;text-align:center}
+  #toast.show{opacity:1}
+  @media(max-width:480px){.two{grid-template-columns:1fr}.savebar .in{flex-wrap:wrap}.savebar .info{flex:1 1 100%}.savebar .btn{flex:1}main{padding-bottom:170px}}
+</style>
+</head>
+<body>
+<header><b>Urus Katalog</b><a href="./">Buka apps</a></header>
+<main>
+  <div class="panel">
+    <h2>Cara guna</h2>
+    <ol>
+      <li>Isi borang di bawah dan tekan "Tambah ke katalog". Ulang untuk setiap barang.</li>
+      <li>Tekan "Muat turun katalog.js" di bawah skrin.</li>
+      <li>Upload fail tu ke GitHub, ganti <code>katalog.js</code> yang lama. Gambar dah ada dalam fail tu, jadi tak perlu upload gambar berasingan.</li>
+    </ol>
+  </div>
+
+  <form class="panel" id="form" autocomplete="off" novalidate>
+    <h2 id="formTitle">Tambah barang</h2>
+    <div class="pick">
+      <div class="prev" id="prev">Tiada gambar</div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+        <label for="fGambar" class="btn" style="margin:0">Pilih gambar barang</label>
+        <input type="file" id="fGambar" accept="image/*">
+        <span class="sub">Barang sahaja, latar putih lagi bagus. Makeup boleh guna warna shade sahaja.</span>
+      </div>
+    </div>
+    <div><label for="fNama">Nama barang</label><input class="field" id="fNama" type="text" maxlength="80" placeholder="cth: Baju Kurung Moden Sage" required></div>
+    <div class="two">
+      <div><label for="fKat">Kategori</label>
+        <select class="field" id="fKat">
+          <optgroup label="Fesyen"><option>baju</option><option>seluar</option><option>tudung</option><option>beg</option><option>kasut</option><option>aksesori</option></optgroup>
+          <optgroup label="Makeup"><option>gincu</option><option>foundation</option><option>bedak</option><option>blusher</option><option>pembayang mata</option><option>celak</option><option>maskara</option><option>kening</option></optgroup>
+        </select></div>
+      <div><label for="fHarga">Harga</label><input class="field" id="fHarga" type="text" maxlength="20" placeholder="cth: RM89"></div>
+    </div>
+    <div><label for="fLink">Link affiliate</label><input class="field" id="fLink" type="url" inputmode="url" placeholder="Tampal link Shopee / TikTok Shop di sini">
+      <span class="sub">Ini link yang pelanggan buka bila tekan Beli. Salin dari Shopee Affiliate atau TikTok Shop, kemudian tampal.</span></div>
+    <div id="warnaBox" style="display:none"><label for="fWarna">Warna shade (makeup)</label>
+      <div class="row" style="align-items:center"><input type="color" id="fWarna" value="#b5607a"><span class="sub">Pilih warna yang paling hampir dengan shade sebenar.</span></div></div>
+    <div><label for="fTag">Kata kunci</label><input class="field" id="fTag" type="text" maxlength="120" placeholder="cth: baju kurung, raya, hijau">
+      <span class="sub">Jenis, gaya dan warna. Dipakai untuk carian dan cadangan AI.</span></div>
+    <div class="row">
+      <button class="btn primary" type="submit" id="btnAdd" style="flex:1">Tambah ke katalog</button>
+      <button class="btn" type="button" id="btnCancel" style="display:none">Batal</button>
+    </div>
+  </form>
+
+  <div class="panel">
+    <h2>Barang dalam katalog <span id="count" class="sub"></span></h2>
+    <div class="list" id="list"></div>
+    <p class="sub" id="empty">Belum ada barang. Tambah yang pertama guna borang di atas.</p>
+  </div>
+</main>
+
+<div class="savebar"><div class="in">
+  <div class="info"><b id="sbTitle">Tiada perubahan</b><span id="sbSize"></span></div>
+  <button class="btn" type="button" id="btnCopy">Salin</button>
+  <button class="btn rose" type="button" id="btnSave">Muat turun katalog.js</button>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script src="katalog.js"></script>
+<script>
+const MAKEUP = ['gincu','foundation','bedak','blusher','pembayang mata','celak','maskara','kening'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3000); }
+
+// Mula dengan katalog yang sedia ada di laman (kalau ada)
+let items = (Array.isArray(window.KATALOG) ? window.KATALOG : []).map(k => ({ nama:k.nama||'', kategori:(k.kategori||'baju').toLowerCase(), gambar:k.gambar||'', warna:k.warna||'', harga:k.harga||'', link:k.link||'', tag:k.tag||'' }));
+let editing = -1, img = '', dirty = false;
+
+// Kecilkan gambar dan simpan terus dalam katalog (data URL), supaya satu fail sahaja perlu di-upload
+function shrink(file){
+  return new Promise((res, rej) => {
+    const im = new Image(), url = URL.createObjectURL(file);
+    im.onload = () => {
+      const s = Math.min(1, 800 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas'); c.width = Math.round(im.width*s); c.height = Math.round(im.height*s);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(); };
+    im.src = url;
+  });
+}
+function showPrev(){ $('prev').innerHTML = img ? `<img src="${esc(img)}" alt="">` : 'Tiada gambar'; }
+$('fGambar').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { img = await shrink(f); showPrev(); } catch (err) { toast('Tak dapat baca gambar tu. Cuba JPG atau PNG.'); }
+});
+function syncWarna(){ $('warnaBox').style.display = MAKEUP.includes($('fKat').value) ? 'block' : 'none'; }
+$('fKat').addEventListener('change', syncWarna);
+
+function resetForm(){
+  editing = -1; img = ''; $('form').reset(); showPrev(); syncWarna();
+  $('formTitle').textContent = 'Tambah barang'; $('btnAdd').textContent = 'Tambah ke katalog'; $('btnCancel').style.display = 'none';
+}
+$('btnCancel').addEventListener('click', resetForm);
+$('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const kat = $('fKat').value, isMk = MAKEUP.includes(kat), nama = $('fNama').value.trim();
+  if (!nama) { toast('Isi nama barang dulu'); return $('fNama').focus(); }
+  if (!img && !isMk) return toast('Pilih gambar barang dulu');
+  let link = $('fLink').value.trim();
+  if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+  const it = { nama, kategori:kat, gambar:img, warna:isMk ? $('fWarna').value : '', harga:$('fHarga').value.trim(), link, tag:$('fTag').value.trim() };
+  if (editing >= 0) items[editing] = it; else items.push(it);
+  dirty = true; toast(editing >= 0 ? 'Barang dikemas kini' : 'Barang ditambah'); resetForm(); render();
+});
+function edit(i){
+  const it = items[i]; editing = i; img = it.gambar;
+  $('fNama').value = it.nama; $('fHarga').value = it.harga; $('fLink').value = it.link; $('fTag').value = it.tag;
+  if (![...$('fKat').options].some(o => o.value === it.kategori)) $('fKat').add(new Option(it.kategori, it.kategori));
+  $('fKat').value = it.kategori; if (it.warna) $('fWarna').value = it.warna;
+  showPrev(); syncWarna();
+  $('formTitle').textContent = 'Edit barang'; $('btnAdd').textContent = 'Simpan perubahan'; $('btnCancel').style.display = 'block';
+  $('form').scrollIntoView({ behavior:'smooth' });
+}
+function output(){
+  return '// KATALOG untuk Live Try-On. Dijana oleh urus.html: edit di sana, bukan di sini.\n' +
+         '// Letak fail ini dalam folder yang sama dengan index.html.\n' +
+         'window.KATALOG = ' + JSON.stringify(items, null, 1) + ';\n';
+}
+function render(){
+  $('list').innerHTML = items.map((it, i) => `
+    <div class="it">
+      <div class="th" ${!it.gambar && it.warna ? `style="background:${esc(it.warna)}"` : ''}>${it.gambar ? `<img src="${esc(it.gambar)}" alt="" loading="lazy">` : ''}</div>
+      <div class="tx"><div class="nm">${esc(it.nama)}</div>
+        <div class="mt">${esc(it.kategori)}${it.harga ? ', ' + esc(it.harga) : ''}, <span class="${it.link ? 'tagok' : 'tagno'}">${it.link ? 'link ada' : 'tiada link'}</span></div></div>
+      <button type="button" data-edit="${i}">Edit</button><button type="button" data-del="${i}">Buang</button>
+    </div>`).join('');
+  $('empty').style.display = items.length ? 'none' : 'block';
+  $('count').textContent = items.length ? `(${items.length})` : '';
+  const mb = new Blob([output()]).size / 1048576, noLink = items.filter(it => !it.link).length;
+  $('sbTitle').textContent = dirty ? 'Ada perubahan belum dimuat turun' : 'Tiada perubahan';
+  $('sbSize').innerHTML = `${items.length} barang, ${mb.toFixed(1)} MB${noLink ? `, ${noLink} tiada link` : ''}${mb > 8 ? ' <span class="warn">Fail besar: apps mungkin lambat dibuka.</span>' : ''}`;
+}
+$('list').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.edit !== undefined) return edit(+b.dataset.edit);
+  if (b.dataset.del !== undefined) {
+    if (b.dataset.sure) { items.splice(+b.dataset.del, 1); dirty = true; if (editing >= 0) resetForm(); render(); }
+    else { b.dataset.sure = '1'; b.textContent = 'Pasti?'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = 'Buang'; } }, 2500); }
+  }
+});
+$('btnSave').addEventListener('click', () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([output()], { type:'text/javascript' })); a.download = 'katalog.js'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  dirty = false; render(); toast('katalog.js dimuat turun. Upload ke GitHub untuk ganti yang lama.');
+});
+$('btnCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(output()); toast('Kod katalog disalin'); } catch (e) { toast('Tak dapat salin. Guna butang Muat turun.'); }
+});
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+syncWarna(); render();
+</script>
+</body>
+</html>

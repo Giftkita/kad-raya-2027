@@ -36,7 +36,7 @@
   #settings small{font-size:12px;opacity:.85}
   #settings a{color:var(--mint);font-weight:600}
 
-  main{max-width:1180px;margin:0 auto;padding:16px 14px 120px;display:flex;flex-direction:column;gap:16px}
+  main{max-width:1180px;margin:0 auto;padding:16px 14px 190px;display:flex;flex-direction:column;gap:16px}
   .side{display:flex;flex-direction:column;gap:16px;min-width:0}
   h2{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;line-height:1.1}
   .sub{font-size:13px;color:var(--soft);margin-top:4px}
@@ -149,18 +149,57 @@
   .shade i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
   #cats{display:none}
   .note{font-size:13px;font-weight:600;border:1.5px dashed var(--rose);color:var(--rose);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+  /* ===== Kedai ===== */
+  #viewTry{display:none} body[data-view=try] #viewTry{display:block}
+  .page{display:none;max-width:1180px;margin:0 auto;padding:14px 14px 110px;flex-direction:column;gap:14px}
+  body[data-view=shop] #viewShop,body[data-view=saved] #viewSaved,body[data-view=info] #viewInfo{display:flex}
+  .searchbar{position:sticky;top:52px;z-index:5;background:var(--porcelain);padding:6px 0}
+  .searchbar input{width:100%;border:0;border-radius:999px;padding:13px 18px;font-size:15px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line)}
+  .scroller{display:flex;gap:6px;overflow-x:auto;padding:2px}
+  .scroller .chip{flex:none}
+  .banner{background:linear-gradient(135deg,var(--plum),var(--ink));color:#fff;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+  .banner h1{font-family:var(--display);font-weight:600;font-size:28px;line-height:1.05;letter-spacing:-.015em}
+  .banner p{font-size:14px;opacity:.85;max-width:30em}
+  .banner .btn{background:var(--mint);color:var(--ink);box-shadow:none;font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .pc{background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;box-shadow:0 1px 0 var(--line)}
+  .pimg{position:relative;aspect-ratio:1;background:#fff}
+  .pimg img,.pimg .txt{width:100%;height:100%;object-fit:contain;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-size:20px}
+  .trybadge{position:absolute;left:8px;bottom:8px;background:var(--mint);color:var(--ink);font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+  .heart{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:var(--line);font-size:17px;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.18);line-height:1}
+  .heart[aria-pressed=true]{color:var(--rose)}
+  .pinfo{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px}
+  .pn{font-size:13.5px;font-weight:600;line-height:1.25;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:2.5em}
+  .pp{color:var(--rose);font-size:16px}
+  .emptymsg{display:none;text-align:center;color:var(--soft);padding:30px 10px;font-size:14px}
+  .howto{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;counter-reset:s}
+  .howto li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;font-size:14px}
+  .howto li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700;display:grid;place-items:center;font-size:13px}
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:9;display:flex;background:var(--paper);box-shadow:0 -1px 0 var(--line);padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{flex:1;border:0;background:transparent;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--soft);cursor:pointer}
+  .tabbar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar button[aria-current=page]{color:var(--ink);font-weight:700}
+  .sheet{position:fixed;inset:0;z-index:20;background:rgba(35,20,43,.55);display:none;align-items:flex-end;justify-content:center}
+  .sheet.show{display:flex}
+  .sheetbox{background:var(--paper);width:100%;max-width:520px;max-height:92vh;overflow-y:auto;border-radius:26px 26px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;position:relative}
+  .sheetbox .pimg{border-radius:18px;overflow:hidden;max-height:46vh}
+  .sheetbox .x{position:absolute;top:24px;right:24px;z-index:2;width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.95);font-size:15px;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.2)}
+  .sheetbox .price{color:var(--rose);font-size:24px;font-weight:700}
+  .sheetbox .row2{display:flex;gap:8px}
+  .sheetbox .row2 .btn{flex:1;padding:14px 10px;font-size:15px}
+  @media(min-width:700px){.grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}.sheet{align-items:center}.sheetbox{border-radius:26px}}
   .ghost{position:fixed;width:84px;height:84px;pointer-events:none;z-index:50;opacity:.9;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3));display:none}
   .ghost img{width:100%;height:100%;object-fit:contain}
-  #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
+  #toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
   #toast.show{opacity:1}
 
   @media(max-width:899px){
-    .cta{position:fixed;left:0;right:0;bottom:0;z-index:7;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--paper);box-shadow:0 -8px 24px -12px rgba(35,20,43,.35)}
+    .cta{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:7;padding:10px 14px;background:var(--paper);box-shadow:0 -8px 24px -12px rgba(35,20,43,.35)}
     .drop{min-height:360px}
   }
   @media(min-width:900px){
     .modes{margin-top:18px}
-    main{display:grid;grid-template-columns:minmax(0,1fr) 420px;align-items:start;gap:22px;padding:22px 22px 40px}
+    main{display:grid;grid-template-columns:minmax(0,1fr) 420px;align-items:start;gap:22px;padding:22px 22px 110px}
     .stagecol{position:sticky;top:76px}
     .rail{flex-wrap:wrap;overflow:visible}
     .g{width:calc(33.333% - 7px)} .g.add{width:calc(33.333% - 7px)}
@@ -168,7 +207,7 @@
   @media(prefers-reduced-motion:reduce){.busy::before{animation:none;top:40%}.drop.glint::after{animation:none}*{transition:none!important}}
 </style>
 </head>
-<body>
+<body data-view="shop">
 <header>
   <span class="wordmark">Live Try-On</span>
   <button class="pill" id="btnSettings" type="button"></button>
@@ -187,6 +226,43 @@
   </div>
 </div>
 
+<section class="page" id="viewShop">
+  <div class="searchbar"><input id="q" type="search" placeholder="Cari baju, beg, kasut, gincu..." aria-label="Cari barang"></div>
+  <div class="banner">
+    <h1>Cuba dulu, baru beli</h1>
+    <p>Tengok barang pada badan dan muka kau sendiri sebelum bayar.</p>
+    <button class="btn" type="button" data-go="try">Buka bilik persalinan</button>
+  </div>
+  <div class="scroller" id="shopCats"></div>
+  <div class="grid" id="grid"></div>
+  <p class="emptymsg" id="shopEmpty">Tak jumpa barang. Cuba kata carian lain.</p>
+</section>
+
+<section class="page" id="viewSaved">
+  <h2>Disimpan</h2>
+  <div class="grid" id="savedGrid"></div>
+  <p class="emptymsg" id="savedEmpty">Belum ada barang disimpan. Tekan tanda hati pada mana-mana barang.</p>
+</section>
+
+<section class="page" id="viewInfo">
+  <div class="panel">
+    <h2>Cara membeli</h2>
+    <ol class="howto">
+      <li>Pilih barang di Kedai dan tekan "Cuba pada saya".</li>
+      <li>Upload gambar kau dan tengok hasilnya.</li>
+      <li>Suka? Tekan Beli. Kau akan dibawa ke kedai rasmi barang tu, contohnya Shopee atau TikTok Shop.</li>
+      <li>Bayaran, penghantaran dan penjejakan pesanan semuanya dalam aplikasi kedai tu. Semak status pesanan di sana.</li>
+    </ol>
+  </div>
+  <div class="panel">
+    <h2>Akses try-on</h2>
+    <p class="sub" id="infoAkses"></p>
+    <button class="btn primary" type="button" id="btnAkses">Urus akses</button>
+  </div>
+  <p class="privacy">Apps ini tidak menjual barang secara langsung. Pautan Beli ialah pautan affiliate: kami mungkin terima komisen tanpa kos tambahan pada kau.</p>
+</section>
+
+<div id="viewTry">
 <nav class="modes" id="modes" aria-label="Pilih mod">
   <button type="button" data-mode="fesyen" aria-pressed="true">Fesyen</button>
   <button type="button" data-mode="makeup" aria-pressed="false">Makeup</button>
@@ -270,6 +346,30 @@
     </div>
   </div>
 </main>
+</div>
+
+<nav class="tabbar" id="tabs" aria-label="Menu utama">
+  <button type="button" data-view="shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9l1.5-5h13L20 9M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></svg>Kedai</button>
+  <button type="button" data-view="try"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10V8.5c0-1.2 1-1.8 2-2.3 1.1-.6 2-1.3 2-2.5a4 4 0 0 0-8 0M12 10 3 17c-1 .8-.5 2 .8 2h16.4c1.3 0 1.8-1.2.8-2Z"/></svg>Cuba</button>
+  <button type="button" data-view="saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg>Simpan</button>
+  <button type="button" data-view="info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Info</button>
+</nav>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shName">
+  <div class="sheetbox">
+    <button class="x" type="button" id="shClose" aria-label="Tutup">✕</button>
+    <div class="pimg" id="shImg"></div>
+    <h2 id="shName"></h2>
+    <div class="price" id="shPrice"></div>
+    <p class="sub" id="shTag"></p>
+    <div class="row2">
+      <button class="btn primary" type="button" id="shTry">Cuba pada saya</button>
+      <a class="btn buynow" id="shBuy" href="#" target="_blank" rel="noopener sponsored">Beli</a>
+    </div>
+    <button class="btn" type="button" id="shSave">Simpan</button>
+    <p class="sub" id="shNote"></p>
+  </div>
+</div>
 
 <div class="ghost" id="ghost"><img id="ghostImg" alt=""></div>
 <div id="toast" role="status"></div>
@@ -435,7 +535,7 @@ refreshAccess();
 // ================= ALMARI =================
 function svgToDataUrl(svg){ return 'data:image/svg+xml;utf8,' + svg; }
 function addGarmentTile(g, removable=false){
-  g.id = ++gid;
+  g.id = ++gid; g.user = removable;      // barang yang ditambah pengguna tak masuk Kedai
   const kat = (g.kategori || '').toLowerCase().trim();
   g.mode = g.mode || (KATEGORI_MAKEUP.includes(kat) ? 'makeup' : 'fesyen');
   g.kategori = kat || (g.mode === 'makeup' ? 'makeup' : 'baju');
@@ -503,7 +603,7 @@ function refreshSearch(){
     b.addEventListener('click', () => { cat = k; refreshSearch(); });
     c.appendChild(b);
   });
-  applyFilter();
+  applyFilter(); renderShop();
 }
 function applyFilter(){
   const q = $('cari').value.trim().toLowerCase();
@@ -908,7 +1008,91 @@ function renderAdvice(d){
 }
 function allGarments(){ return registry.filter(g => g.tile.isConnected); }
 $('btnAnalyse').addEventListener('click', analyse);
+
+// ================= KEDAI =================
+let shopCat = 'semua', sheetG = null;
+let saved = []; try { saved = JSON.parse(store('tryon_simpan') || '[]'); } catch (e) { saved = []; }
+const shopItems = () => registry.filter(g => g.tile.isConnected && !g.user);
+const platform = l => /shopee|shp\.ee/i.test(l) ? 'Shopee' : /tiktok/i.test(l) ? 'TikTok Shop' : /lazada|lzd\.co/i.test(l) ? 'Lazada' : 'kedai rasmi';
+const cap = k => k[0].toUpperCase() + k.slice(1);
+function thumb(g){ return g.text ? `<div class="txt" style="background:${hexOk(g.warna)};color:${inkOn(g.warna)}">${esc(cap(g.kategori))}</div>` : `<img src="${esc(g.src)}" alt="" loading="lazy">`; }
+function cardHtml(g){
+  return `<article class="pc" data-id="${g.id}" tabindex="0" role="button" aria-label="${esc(g.name)}"><div class="pimg">${thumb(g)}<span class="trybadge">Boleh cuba</span><button type="button" class="heart" aria-label="Simpan ${esc(g.name)}" aria-pressed="${saved.includes(g.name)}">♥</button></div><div class="pinfo"><span class="pn">${esc(g.name)}</span><b class="pp">${esc(g.harga || '')}</b></div></article>`;
+}
+function renderShop(){
+  const all = shopItems(), cats = [...new Set(all.map(g => g.kategori))];
+  if (shopCat !== 'semua' && !cats.includes(shopCat)) shopCat = 'semua';
+  const c = $('shopCats'); c.innerHTML = '';
+  ['semua', ...cats].forEach(k => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = k === 'semua' ? 'Semua' : cap(k);
+    b.setAttribute('aria-pressed', k === shopCat); b.addEventListener('click', () => { shopCat = k; renderShop(); }); c.appendChild(b);
+  });
+  const q = $('q').value.trim().toLowerCase();
+  const list = all.filter(g => (shopCat === 'semua' || g.kategori === shopCat) && (!q || g.tile.dataset.q.includes(q)));
+  $('grid').innerHTML = list.map(cardHtml).join('');
+  $('shopEmpty').style.display = list.length ? 'none' : 'block';
+  if (document.body.dataset.view === 'saved') renderSaved();
+}
+function renderSaved(){
+  const list = shopItems().filter(g => saved.includes(g.name));
+  $('savedGrid').innerHTML = list.map(cardHtml).join(''); $('savedEmpty').style.display = list.length ? 'none' : 'block';
+}
+function toggleSave(g){
+  saved = saved.includes(g.name) ? saved.filter(n => n !== g.name) : [...saved, g.name];
+  store('tryon_simpan', JSON.stringify(saved));
+  const on = saved.includes(g.name);
+  document.querySelectorAll(`.pc[data-id="${g.id}"] .heart`).forEach(x => x.setAttribute('aria-pressed', on));
+  if (sheetG === g) $('shSave').textContent = on ? 'Disimpan ♥' : 'Simpan';
+  if (document.body.dataset.view === 'saved') renderSaved();
+}
+function openSheet(g){
+  sheetG = g;
+  $('shImg').innerHTML = thumb(g); $('shName').textContent = g.name; $('shPrice').textContent = g.harga || '';
+  $('shTag').textContent = cap(g.kategori) + (g.tag ? ', ' + g.tag : '');
+  $('shSave').textContent = saved.includes(g.name) ? 'Disimpan ♥' : 'Simpan';
+  const b = $('shBuy'), p = platform(g.link || '');
+  if (g.link) { b.href = g.link; b.textContent = `Beli di ${p}`; b.style.display = 'block'; $('shNote').textContent = `Bayaran, penghantaran dan penjejakan pesanan diurus dalam aplikasi ${p}. Semak status pesanan di sana.`; }
+  else { b.style.display = 'none'; $('shNote').textContent = 'Pautan beli belum ditambah untuk barang ni.'; }
+  $('sheet').classList.add('show'); $('shTry').focus();
+}
+function closeSheet(){ $('sheet').classList.remove('show'); sheetG = null; }
+function tryItem(g){
+  closeSheet();
+  if (g.mode !== mode) setMode(g.mode);
+  if (!sel.includes(g)) { if (sel.length >= CONFIG.MAX_ITEM) sel = [g]; else sel.push(g); syncSel(); }
+  go('try');
+  if (!originalSrc) toast(TEKS[mode].foto, 5000);
+  else if (canCall()) generate();
+  else { openSettings(true); toast(PROXY ? 'Masukkan kod kredit untuk mula cuba' : 'Masukkan Gemini API key untuk mula cuba'); }
+}
+function go(v){
+  document.body.dataset.view = v;
+  [...$('tabs').children].forEach(b => b.setAttribute('aria-current', b.dataset.view === v ? 'page' : 'false'));
+  if (v === 'saved') renderSaved();
+  if (v === 'info') $('infoAkses').textContent = PROXY ? 'Setiap gambar try-on guna kredit: gambar biasa 1 kredit, gambar HD 2 kredit. Masukkan kod kredit kau untuk mula.' : 'Mod ujian: masukkan Gemini API key kau sendiri untuk guna try-on.';
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => {
+  const goBtn = e.target.closest('[data-go]'); if (goBtn) return go(goBtn.dataset.go);
+  const pc = e.target.closest('.pc'); if (!pc) return;
+  const g = registry.find(x => x.id === +pc.dataset.id); if (!g) return;
+  if (e.target.closest('.heart')) return toggleSave(g);
+  openSheet(g);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSheet();
+  if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('pc')) e.target.click();
+});
+[...$('tabs').children].forEach(b => b.addEventListener('click', () => go(b.dataset.view)));
+$('q').addEventListener('input', renderShop);
+$('sheet').addEventListener('click', e => { if (e.target === $('sheet')) closeSheet(); });
+$('shClose').addEventListener('click', closeSheet);
+$('shTry').addEventListener('click', () => sheetG && tryItem(sheetG));
+$('shSave').addEventListener('click', () => sheetG && toggleSave(sheetG));
+$('btnAkses').addEventListener('click', () => { openSettings(true); window.scrollTo(0, 0); });
+
 setMode('fesyen');
+go('shop');
 </script>
 </body>
 </html>
