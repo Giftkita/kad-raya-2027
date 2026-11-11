@@ -148,6 +148,7 @@
   .shade{display:inline-flex;align-items:center;gap:7px;border:0;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);border-radius:999px;padding:5px 12px 5px 5px;font-size:13px;font-weight:600;cursor:pointer}
   .shade i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
   #cats{display:none}
+  .note{font-size:13px;font-weight:600;border:1.5px dashed var(--rose);color:var(--rose);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
   .ghost{position:fixed;width:84px;height:84px;pointer-events:none;z-index:50;opacity:.9;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3));display:none}
   .ghost img{width:100%;height:100%;object-fit:contain}
   #toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:30;max-width:90vw;text-align:center}
@@ -224,6 +225,7 @@
       <div class="rail" id="garments">
         <label class="g add" for="garmentFile"><b>+</b><span id="addLbl">Tambah gambar barang</span></label>
       </div>
+      <p class="note" id="missNote" style="display:none"></p>
       <input type="file" id="garmentFile" accept="image/*" multiple>
       <div>
         <label class="optlabel" for="idaman" id="lblIdaman">Tak ada gambar? Taip barang idaman kau</label>
@@ -445,7 +447,7 @@ function addGarmentTile(g, removable=false){
     + (removable ? `<span class="del" title="Buang">✕</span>` : '')
     + (g.harga || g.link ? `<div class="meta"><span class="nm">${esc(g.name)}</span><span class="row">${g.harga ? `<b>${esc(g.harga)}</b>` : '<span></span>'}${g.link ? `<a class="buy" href="${esc(g.link)}" target="_blank" rel="noopener sponsored">Beli</a>` : ''}</span></div>` : '');
   const im = d.querySelector('img');
-  if (im) im.addEventListener('error', () => { console.warn(`Gambar tak jumpa: ${g.src}. Semak path dalam katalog.js`); removeGarment(g); });
+  if (im) im.addEventListener('error', () => { console.warn(`Gambar tak jumpa: ${g.src}. Semak path dalam katalog.js`); removeGarment(g); reportMissing(g.src); });
   d.addEventListener('click', e => {
     if (e.target.classList.contains('buy')) { e.stopPropagation(); return; }
     if (e.target.classList.contains('del')) return removeGarment(g);
@@ -457,6 +459,18 @@ function addGarmentTile(g, removable=false){
   if (!g.text) d.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' || e.target.classList.contains('buy') || e.target.classList.contains('del')) return; startDrag(e, g); });
   g.tile = d; registry.push(g);
   $('garments').insertBefore(d, $('garments').lastElementChild);
+}
+// Gambar katalog yang tak jumpa: beritahu dengan jelas, dan isi semula tab yang jadi kosong dengan contoh
+const missing = [];
+function reportMissing(src){
+  if (src.startsWith('data:')) return;
+  missing.push(src); clearTimeout(reportMissing.t);
+  reportMissing.t = setTimeout(() => {
+    if (!registry.some(g => g.tile.isConnected && g.mode === 'fesyen')) SAMPLE_GARMENTS.forEach(s => { const u = svgToDataUrl(s.svg); addGarmentTile({ name:s.name, src:u, dataUrl:u, kategori:s.kategori }); });
+    const n = $('missNote'); n.style.display = 'block';
+    n.textContent = `${missing.length} gambar dalam katalog.js tak jumpa: ${missing.slice(0, 6).join(', ')}${missing.length > 6 ? ', ...' : ''}. Upload fail gambar ni ke folder yang sama dengan apps, dengan nama yang tepat.`;
+    refreshSearch();
+  }, 400);
 }
 function removeGarment(g){ g.tile.remove(); sel = sel.filter(x => x !== g); syncSel(); refreshSearch(); }
 function toggleGarment(g){
